@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -416,7 +417,8 @@ int main(int argc, char *argv[])
       }
     }
 
-    if (int sz = read(mouse_fd, &mouse_event, sizeof(struct input_event)))
+    int sz;
+    if (sz = read(mouse_fd, &mouse_event, sizeof(struct input_event)))
     {
       if (sz != -1)
       {
