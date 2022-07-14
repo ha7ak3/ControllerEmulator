@@ -249,87 +249,53 @@ int main(int argc, char *argv[])
       }
     }
 
-    int sz;
-    if (sz = read(mouse_fd, &mouse_event, sizeof(struct input_event)))
+    if (read(mouse_fd, &mouse_event, sizeof(struct input_event)) != -1)
     {
-      if (sz != -1)
+      //printf("Mouse event: %d %d %d \n", mouse_event.code, mouse_event.type, mouse_event.value);
+      switch (mouse_event.type)
       {
-        //printf("Mouse event: %d %d %d \n", mouse_event.code, mouse_event.type, mouse_event.value);
-        switch (mouse_event.type)
+      case EV_REL:
+        if (mouse_event.code == REL_X)
         {
-        case EV_REL:
-          if (mouse_event.code == REL_X)
-          {
-            int toWrite = 0;
-            if (mouse_event.value > 0)
-            {
-              //mouseMaxX -= mouseMaxX / 8;
-              //if (mouse_event.value > mouseMaxX) mouseMaxX = mouse_event.value;
-              toWrite = mouse_event.value * 32;//( mouse_event.value * MOUSE_SENSITIVITY ) / mouseMaxX;
-              if (toWrite > MOUSE_SENSITIVITY) toWrite = MOUSE_SENSITIVITY;
-            }
-            if (mouse_event.value < 0)
-            {
-              //mouseMinX -= mouseMinX / 8;
-              //if (mouse_event.value < mouseMinX) mouseMinX = mouse_event.value;
-              toWrite = mouse_event.value * 32;//( mouse_event.value * MOUSE_SENSITIVITY_NEGATIVE ) / mouseMinX;
-              if (toWrite < MOUSE_SENSITIVITY_NEGATIVE) toWrite = MOUSE_SENSITIVITY_NEGATIVE;
-            }
-            if (mouse_event.value == 0)
-            {
-              toWrite = 0;
-            }
+          int toWrite = mouse_event.value * 32;
+          if (mouse_event.value > 0 && toWrite > MOUSE_SENSITIVITY) toWrite = MOUSE_SENSITIVITY;
+          if (mouse_event.value < 0 && toWrite < MOUSE_SENSITIVITY_NEGATIVE) toWrite = MOUSE_SENSITIVITY_NEGATIVE;
+          if (mouse_event.value == 0) toWrite = 0;
 
-            send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, toWrite);
-          }
-          if (mouse_event.code == REL_Y)
-          {
-            int toWrite = 0;
-            if (mouse_event.value > 0)
-            {
-              //mouseMaxY -= mouseMaxY / 4;
-              //if (mouse_event.value > mouseMaxY) mouseMaxY = mouse_event.value;
-              toWrite = mouse_event.value * 32;//( mouse_event.value * MOUSE_SENSITIVITY ) / mouseMaxY;
-              if (toWrite > MOUSE_SENSITIVITY) toWrite = MOUSE_SENSITIVITY;
-            }
-            if (mouse_event.value < 0)
-            {
-              //mouseMinY -= mouseMinY / 4;
-              //if (mouse_event.value < mouseMinY) mouseMinY = mouse_event.value;
-              toWrite = mouse_event.value * 32;//( mouse_event.value * MOUSE_SENSITIVITY_NEGATIVE ) / mouseMinY;
-              if (toWrite < MOUSE_SENSITIVITY_NEGATIVE) toWrite = MOUSE_SENSITIVITY_NEGATIVE;
-            }
-            if (mouse_event.value == 0)
-            {
-              toWrite = 0;
-            }
-
-            send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, toWrite);
-          }
-          if (mouse_event.code == REL_WHEEL)
-          {
-          	absMultiplier += mouse_event.value;
-            if (absMultiplier >= 15) absMultiplier = 15;
-            if (absMultiplier <= 1) absMultiplier = 1;
-          }
-          break;
-        case EV_KEY:
-          if (mouse_event.code == BTN_LEFT) send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_THUMBL, mouse_event.value);
-          if (mouse_event.code == BTN_RIGHT) send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_THUMBR, mouse_event.value);
-          
-          // reset controller state
-          if (mouse_event.code == BTN_MIDDLE)
-          {
-            printf("Middle button of mouse clicked!\n");
-            
-            send_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, 0);
-            send_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, 0);
-
-            // send one sync event for both axes
-            send_sync_event(gamepad_fd, gamepad_ev);
-          }
-          break;
+          send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, toWrite);
         }
+        if (mouse_event.code == REL_Y)
+        {
+          int toWrite = mouse_event.value * 32;
+          if (mouse_event.value > 0 && toWrite > MOUSE_SENSITIVITY) toWrite = MOUSE_SENSITIVITY;
+          if (mouse_event.value < 0 && toWrite < MOUSE_SENSITIVITY_NEGATIVE) toWrite = MOUSE_SENSITIVITY_NEGATIVE;
+          if (mouse_event.value == 0) toWrite = 0;
+
+          send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, toWrite);
+        }
+        if (mouse_event.code == REL_WHEEL)
+        {
+          absMultiplier += mouse_event.value;
+          if (absMultiplier >= 15) absMultiplier = 15;
+          if (absMultiplier <= 1) absMultiplier = 1;
+        }
+        break;
+      case EV_KEY:
+        if (mouse_event.code == BTN_LEFT) send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_THUMBL, mouse_event.value);
+        if (mouse_event.code == BTN_RIGHT) send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_THUMBR, mouse_event.value);
+          
+        // reset controller state
+        if (mouse_event.code == BTN_MIDDLE)
+        {
+          printf("Middle button of mouse clicked!\n");
+            
+          send_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, 0);
+          send_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, 0);
+
+          // send one sync event for both axes
+          send_sync_event(gamepad_fd, gamepad_ev);
+        }
+        break;
       }
     }
   }
