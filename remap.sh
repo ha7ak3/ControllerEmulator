@@ -1,5 +1,6 @@
 #!/bin/bash
-EVDEV="/dev/input/event22"
+#The path to the emulated controller (should look something like /dev/input/eventX)
+EVDEV="<YOUR-PATH>"
 
 K00="BTN_EAST=B"
 K01="BTN_SOUTH=A"
