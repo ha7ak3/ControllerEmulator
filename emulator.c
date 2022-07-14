@@ -19,21 +19,12 @@ char MOUSE_PATH[] = "<YOUR-PATH>";
 
 #define GAMEPAD_NAME "Virtual XPAD"
 
-
 bool q_pressed = false;
-
-int absXLEFT = 0;
-int absXRIGHT = 0;
-int absYUP = 0;
-int absYDOWN = 0;
 
 int MOUSE_SENSITIVITY = 512;//32767;//299;
 int MOUSE_SENSITIVITY_NEGATIVE = -512;//-32767;//-299;
 
-int mouseMinX = 0;
-int mouseMaxX = 0;
-int mouseMinY = 0;
-int mouseMaxY = 0;
+int absMultiplier = 8;
 
 void exitFunc(int keyboard_fd, int mouse_fd, int gamepad_fd)
 {
@@ -48,15 +39,15 @@ void exitFunc(int keyboard_fd, int mouse_fd, int gamepad_fd)
 
 void send_sync_event(int gamepad_fd, struct input_event gamepad_event)
 {
-    memset(&gamepad_event, 0, sizeof(struct input_event));
-    gamepad_event.type = EV_SYN;
-    gamepad_event.code = 0;
-    gamepad_event.value = 0;
+  memset(&gamepad_event, 0, sizeof(struct input_event));
+  gamepad_event.type = EV_SYN;
+  gamepad_event.code = 0;
+  gamepad_event.value = 0;
 
-    if(write(gamepad_fd, &gamepad_event, sizeof(struct input_event)) < 0)
-    {
-      printf("error writing sync event\n");
-    }
+  if(write(gamepad_fd, &gamepad_event, sizeof(struct input_event)) < 0)
+  {
+    printf("error writing sync event\n");
+  }
 }
 
 // TYPE Is The event to write to the gamepad and CODE is an integer value for the button on the gamepad
@@ -225,66 +216,12 @@ int main(int argc, char *argv[])
         }
       }
 
-      // J to X axis move right in increments
-      if (keyboard_event.code == KEY_J)
-      {
-        if (++absXRIGHT >= 32767) absXRIGHT = 32767;
-        send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_X, absXRIGHT);
-      }
-
-      // L to X axis move left in increments
-      if (keyboard_event.code == KEY_L)
-      {
-        if (--absXLEFT <= -32768) absXLEFT = -32768;
-        send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_X, absXLEFT);
-      }
-
-      // I to Y axis move up inincrements
-      if (keyboard_event.code == KEY_I)
-      {
-        if (--absYUP <= -32768) absYUP = -32768;
-        send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_Y, absYUP);
-      }
-
-      // K to Y axis move down in increments
-      if (keyboard_event.code == KEY_K)
-      {
-        if (++absYDOWN >= 32767) absYDOWN = 32767;
-        send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_Y, absYDOWN);
-      }
-
-      // W to Y axis move up(forward) full speed
-      if (keyboard_event.code == KEY_W)
-      {
-        int toWrite = 0;
-        if (keyboard_event.value == 2 || keyboard_event.value == 1) // on pressed or on hold key
-          toWrite = -32768;
-        send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_Y, toWrite);
-      }
-
-      // S to Y move down(backwards) full speed
-      if (keyboard_event.code == KEY_S)
-      {
-        int toWrite = 0;
-        if (keyboard_event.value == 2 || keyboard_event.value == 1) // on pressed or on hold key
-          toWrite = 32767;
-        send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_Y, toWrite);
-      }
-
-      if (keyboard_event.code == KEY_A)
-      {
-        int toWrite = 0;
-        if (keyboard_event.value == 2 || keyboard_event.value == 1) // on pressed or on hold key
-          toWrite = -32768;
-        send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_X, toWrite);
-      }
-
-      if (keyboard_event.code == KEY_D)
-      {
-        int toWrite = 0;
-        if (keyboard_event.value == 2 || keyboard_event.value == 1) // on pressed or on hold key
-          toWrite = 32767;
-        send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_X, toWrite);
+      bool pressedOrHold = keyboard_event.value == 2 || keyboard_event.value == 1;
+      switch (keyboard_event.code) {
+        case KEY_W: send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_Y, pressedOrHold ? -2000 * absMultiplier : 0); break;
+        case KEY_S: send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_Y, pressedOrHold ? 2000 * absMultiplier : 0); break;
+        case KEY_A: send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_X, pressedOrHold ? -2000 * absMultiplier : 0); break;
+        case KEY_D: send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_X, pressedOrHold ? 2000 * absMultiplier : 0); break;
       }
       
       switch (keyboard_event.code) {
@@ -297,6 +234,9 @@ int main(int argc, char *argv[])
         case KEY_DOWN: send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_DPAD_DOWN, keyboard_event.value); break;
         case KEY_LEFT: send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_DPAD_LEFT, keyboard_event.value); break;
         case KEY_RIGHT: send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_DPAD_RIGHT, keyboard_event.value); break;
+        
+        case KEY_PAGEUP: absMultiplier >= 15 ? absMultiplier = 15 : absMultiplier++; break;
+        case KEY_PAGEDOWN: absMultiplier <= 1 ? absMultiplier = 1 : absMultiplier--; break;
 
         // reset view joystick on left control
         case KEY_LEFTCTRL: {
@@ -365,6 +305,12 @@ int main(int argc, char *argv[])
             }
 
             send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, toWrite);
+          }
+          if (mouse_event.code == REL_WHEEL)
+          {
+          	absMultiplier += mouse_event.value;
+            if (absMultiplier >= 15) absMultiplier = 15;
+            if (absMultiplier <= 1) absMultiplier = 1;
           }
           break;
         case EV_KEY:
