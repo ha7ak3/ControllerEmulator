@@ -17,6 +17,8 @@
 char KEYBOARD_PATH[] = "<YOUR-PATH>";
 char MOUSE_PATH[] = "<YOUR-PATH>";
 
+#define GAMEPAD_NAME "Virtual XPAD"
+
 
 bool q_pressed = false;
 
@@ -25,8 +27,13 @@ int absXRIGHT = 0;
 int absYUP = 0;
 int absYDOWN = 0;
 
-int MOUSE_SENSITIVITY = 299;
-int MOUSE_SENSITIVITY_NEGATIVE = -299;
+int MOUSE_SENSITIVITY = 512;//32767;//299;
+int MOUSE_SENSITIVITY_NEGATIVE = -512;//-32767;//-299;
+
+int mouseMinX = 0;
+int mouseMaxX = 0;
+int mouseMinY = 0;
+int mouseMaxY = 0;
 
 void exitFunc(int keyboard_fd, int mouse_fd, int gamepad_fd)
 {
@@ -52,7 +59,8 @@ void send_sync_event(int gamepad_fd, struct input_event gamepad_event)
     }
 }
 
-void send_keyboard_event(int gamepad_fd, struct input_event gamepad_event, int TYPE, int CODE, int VALUE) // TYPE Is The event to write to the gamepad and CODE is an integer value for the button on the gamepad
+// TYPE Is The event to write to the gamepad and CODE is an integer value for the button on the gamepad
+void send_event(int gamepad_fd, struct input_event gamepad_event, int TYPE, int CODE, int VALUE)
 {
   memset(&gamepad_event, 0, sizeof(struct input_event));
   gamepad_event.type = TYPE;
@@ -61,21 +69,14 @@ void send_keyboard_event(int gamepad_fd, struct input_event gamepad_event, int T
 
   if(write(gamepad_fd, &gamepad_event, sizeof(struct input_event)) < 0)
   {
-    printf("Error writing keyboard event to gamepad!\n");
+    printf("Error writing event to gamepad!\n");
   }
 }
 
-void send_mouse_event(int gamepad_fd, struct input_event gamepad_event, int TYPE, int CODE, int VALUE)
+void send_event_and_sync(int gamepad_fd, struct input_event gamepad_event, int TYPE, int CODE, int VALUE)
 {
-  memset(&gamepad_event, 0, sizeof(struct input_event));
-  gamepad_event.type = TYPE;
-  gamepad_event.code = CODE;
-  gamepad_event.value = VALUE;
-
-  if(write(gamepad_fd, &gamepad_event, sizeof(struct input_event)) < 0)
-  {
-    printf("Error writing mouse event to gamepad!\n");
-  }
+  send_event(gamepad_fd, gamepad_event, TYPE, CODE, VALUE);
+  send_sync_event(gamepad_fd, gamepad_event);
 }
 
 int main(int argc, char *argv[])
@@ -129,14 +130,18 @@ int main(int argc, char *argv[])
   ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_B);
   ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_X);
   ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_Y);
+  
   ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_TL);
   ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_TR);
   ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_TL2);
   ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_TR2);
+  
   ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_START);
   ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_SELECT);
+  
   ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_THUMBL);
   ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_THUMBR);
+  
   ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_DPAD_UP);
   ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_DPAD_DOWN);
   ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_DPAD_LEFT);
@@ -154,7 +159,7 @@ int main(int argc, char *argv[])
   struct uinput_user_dev uidev;
 
   memset(&uidev, 0, sizeof(uidev));
-  snprintf(uidev.name, UINPUT_MAX_NAME_SIZE, "Gamepad"); // Name of Gamepad
+  snprintf(uidev.name, UINPUT_MAX_NAME_SIZE, GAMEPAD_NAME); // Name of Gamepad
   uidev.id.bustype = BUS_USB;
   uidev.id.vendor = 0x3;
   uidev.id.product = 0x3;
@@ -193,6 +198,8 @@ int main(int argc, char *argv[])
 
   while (1)
   {
+    sleep(0.001);
+  
     if (read(keyboard_fd, &keyboard_event, sizeof(keyboard_event)) != -1)
     {
       // printf("keyboard event: type %d code %d value %d  \n", keyboard_event.type, keyboard_event.code, keyboard_event.value);
@@ -205,116 +212,45 @@ int main(int argc, char *argv[])
         exitFunc(keyboard_fd, mouse_fd, gamepad_fd);
         break;
       }
-      // enter to A
-      if (keyboard_event.code == KEY_ENTER && keyboard_event.value != 2) // only care about button press and not hold
+      
+      if (keyboard_event.value != 2) // only care about button press and not hold
       {
-
-        printf(__STRING(KEY_ENTER));
-        printf(" pressed"
-               "\n");
-
-        //send keyboard event to gamepad
-        send_keyboard_event(gamepad_fd, gamepad_ev, EV_KEY, BTN_A, keyboard_event.value);
-        
-        // send sync event
-        send_sync_event(gamepad_fd, gamepad_ev);
-      }
-
-      // G to Y
-      if (keyboard_event.code == KEY_G && keyboard_event.value != 2) // only care about button press
-      {
-
-        //send keyboard event to gamepad
-        send_keyboard_event(gamepad_fd, gamepad_ev, EV_KEY, BTN_Y, keyboard_event.value);
-
-        // send sync event
-        send_sync_event(gamepad_fd, gamepad_ev);
-      }
-
-      // E to X(interact)
-      if (keyboard_event.code == KEY_E && keyboard_event.value != 2) // only care about button press
-      {
-
-        //send keyboard event to gamepad
-        send_keyboard_event(gamepad_fd, gamepad_ev, EV_KEY, BTN_X, keyboard_event.value);
-
-        // send sync event
-        send_sync_event(gamepad_fd, gamepad_ev);
-      }
-
-      // spacebar to A(jump)
-      if (keyboard_event.code == KEY_SPACE && keyboard_event.value != 2) // only care about button press
-      {
-
-        //send keyboard event to gamepad
-        send_keyboard_event(gamepad_fd, gamepad_ev, EV_KEY, BTN_A, keyboard_event.value);
-
-        // send sync event
-        send_sync_event(gamepad_fd, gamepad_ev);
+        switch (keyboard_event.code) {
+          case KEY_C: send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_Y, keyboard_event.value); break;
+          case KEY_X: send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_X, keyboard_event.value); break;
+          case KEY_SPACE: send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_A, keyboard_event.value); break;
+          case KEY_LEFTALT: send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_B, keyboard_event.value); break;
+          case KEY_ENTER: send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_START, keyboard_event.value); break;
+          case KEY_TAB: send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_SELECT, keyboard_event.value); break;
+        }
       }
 
       // J to X axis move right in increments
       if (keyboard_event.code == KEY_J)
       {
-        absXRIGHT++;
-        if (absXRIGHT >= 32767)
-        {
-          absXRIGHT = 32767;
-        }
-
-        //send keyboard event to gamepad
-        send_keyboard_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_X, absXRIGHT);
-        // send sync event
-        send_sync_event(gamepad_fd, gamepad_ev);
+        if (++absXRIGHT >= 32767) absXRIGHT = 32767;
+        send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_X, absXRIGHT);
       }
 
       // L to X axis move left in increments
       if (keyboard_event.code == KEY_L)
       {
-        absXLEFT--;
-        if (absXLEFT <= -32768)
-        {
-          absXLEFT = -32768;
-        }
-        
-        //send keyboard event to gamepad
-        send_keyboard_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_X, absXLEFT);
-        
-        // send sync event
-        send_sync_event(gamepad_fd, gamepad_ev);
+        if (--absXLEFT <= -32768) absXLEFT = -32768;
+        send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_X, absXLEFT);
       }
 
       // I to Y axis move up inincrements
       if (keyboard_event.code == KEY_I)
       {
-        absYUP--;
-
-        if (absYUP <= -32768)
-        {
-          absYUP = -32768;
-        }
-        
-        //send keyboard event to gamepad
-        send_keyboard_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_Y, absYUP);
-
-        // send sync event
-        send_sync_event(gamepad_fd, gamepad_ev);
+        if (--absYUP <= -32768) absYUP = -32768;
+        send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_Y, absYUP);
       }
 
-      // J to Y axis move down in increments
-      if (keyboard_event.code == KEY_J)
+      // K to Y axis move down in increments
+      if (keyboard_event.code == KEY_K)
       {
-        absYDOWN++;
-        if (absYDOWN >= 32767)
-        {
-          absYDOWN = 32767;
-        }
-
-        //send keyboard event to gamepad
-        send_keyboard_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_Y, absYDOWN);
-
-        // send sync event
-        send_sync_event(gamepad_fd, gamepad_ev);
+        if (++absYDOWN >= 32767) absYDOWN = 32767;
+        send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_Y, absYDOWN);
       }
 
       // W to Y axis move up(forward) full speed
@@ -323,12 +259,7 @@ int main(int argc, char *argv[])
         int toWrite = 0;
         if (keyboard_event.value == 2 || keyboard_event.value == 1) // on pressed or on hold key
           toWrite = -32768;
-
-        //send keyboard event to gamepad
-        send_keyboard_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_Y, toWrite);
-
-        // send sync event
-        send_sync_event(gamepad_fd, gamepad_ev);
+        send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_Y, toWrite);
       }
 
       // S to Y move down(backwards) full speed
@@ -337,12 +268,7 @@ int main(int argc, char *argv[])
         int toWrite = 0;
         if (keyboard_event.value == 2 || keyboard_event.value == 1) // on pressed or on hold key
           toWrite = 32767;
-
-        //send keyboard event to gamepad
-        send_keyboard_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_Y, toWrite);
-
-        // send sync event
-        send_sync_event(gamepad_fd, gamepad_ev);
+        send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_Y, toWrite);
       }
 
       if (keyboard_event.code == KEY_A)
@@ -350,70 +276,36 @@ int main(int argc, char *argv[])
         int toWrite = 0;
         if (keyboard_event.value == 2 || keyboard_event.value == 1) // on pressed or on hold key
           toWrite = -32768;
-
-        //send keyboard event to gamepad
-        send_keyboard_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_X, toWrite);
-
-        // send sync event
-        send_sync_event(gamepad_fd, gamepad_ev);
+        send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_X, toWrite);
       }
 
       if (keyboard_event.code == KEY_D)
       {
-
         int toWrite = 0;
         if (keyboard_event.value == 2 || keyboard_event.value == 1) // on pressed or on hold key
           toWrite = 32767;
-
-        //send keyboard event to gamepad
-        send_keyboard_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_X, toWrite);
-
-        // send sync 
-        send_sync_event(gamepad_fd, gamepad_ev);
+        send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_X, toWrite);
       }
+      
+      switch (keyboard_event.code) {
+        case KEY_LEFTSHIFT: send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_TL, keyboard_event.value); break;
+        case KEY_RIGHTSHIFT: send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_TR, keyboard_event.value); break;
+        case KEY_Q: send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_TL2, keyboard_event.value); break;
+        case KEY_E: send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_TR2, keyboard_event.value); break;
+      
+        case KEY_UP: send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_DPAD_UP, keyboard_event.value); break;
+        case KEY_DOWN: send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_DPAD_DOWN, keyboard_event.value); break;
+        case KEY_LEFT: send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_DPAD_LEFT, keyboard_event.value); break;
+        case KEY_RIGHT: send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_DPAD_RIGHT, keyboard_event.value); break;
 
-      // C to B(cancel)
-      if (keyboard_event.code == KEY_C && keyboard_event.value != 2) // only care about button press
-      {
+        // reset view joystick on left control
+        case KEY_LEFTCTRL: {
+          send_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, 0);
+          send_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, 0);
 
-        //send keyboard event to gamepad
-        send_keyboard_event(gamepad_fd, gamepad_ev, EV_KEY, BTN_B, keyboard_event.value);
-
-        // send sync event
-        send_sync_event(gamepad_fd, gamepad_ev);
-      }
-
-      // V to left stick
-      if (keyboard_event.code == KEY_LEFTSHIFT)
-      {
-        //send keyboard event to gamepad
-        send_keyboard_event(gamepad_fd, gamepad_ev, EV_KEY, BTN_THUMBL, keyboard_event.value);
-
-        // send sync event
-        send_sync_event(gamepad_fd, gamepad_ev);
-      }
-
-      // B to right stick
-      if (keyboard_event.code == KEY_RIGHTSHIFT)
-      {
-        //send keyboard event to gamepad
-        send_keyboard_event(gamepad_fd, gamepad_ev, EV_KEY, BTN_THUMBR, keyboard_event.value);
-
-        // send sync event
-        send_sync_event(gamepad_fd, gamepad_ev);
-      }
-
-      // reset view joystick on left control
-      if (keyboard_event.code == KEY_LEFTCTRL)
-      {
-        //send keyboard event to gamepad
-        send_keyboard_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, 0);
-
-        //send keyboard event to gamepad
-        send_keyboard_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, 0);
-
-        // send one sync event for both axes
-        send_sync_event(gamepad_fd, gamepad_ev);
+          // send one sync event for both axes
+          send_sync_event(gamepad_fd, gamepad_ev);
+        }
       }
     }
 
@@ -422,7 +314,7 @@ int main(int argc, char *argv[])
     {
       if (sz != -1)
       {
-        // printf("Mouse event: %d %d %d \n", mouse_event.code, mouse_event.type, mouse_event.value);
+        //printf("Mouse event: %d %d %d \n", mouse_event.code, mouse_event.type, mouse_event.value);
         switch (mouse_event.type)
         {
         case EV_REL:
@@ -431,74 +323,63 @@ int main(int argc, char *argv[])
             int toWrite = 0;
             if (mouse_event.value > 0)
             {
-              toWrite = MOUSE_SENSITIVITY;
+              //mouseMaxX -= mouseMaxX / 8;
+              //if (mouse_event.value > mouseMaxX) mouseMaxX = mouse_event.value;
+              toWrite = mouse_event.value * 32;//( mouse_event.value * MOUSE_SENSITIVITY ) / mouseMaxX;
+              if (toWrite > MOUSE_SENSITIVITY) toWrite = MOUSE_SENSITIVITY;
             }
             if (mouse_event.value < 0)
             {
-              toWrite = MOUSE_SENSITIVITY_NEGATIVE;
+              //mouseMinX -= mouseMinX / 8;
+              //if (mouse_event.value < mouseMinX) mouseMinX = mouse_event.value;
+              toWrite = mouse_event.value * 32;//( mouse_event.value * MOUSE_SENSITIVITY_NEGATIVE ) / mouseMinX;
+              if (toWrite < MOUSE_SENSITIVITY_NEGATIVE) toWrite = MOUSE_SENSITIVITY_NEGATIVE;
             }
             if (mouse_event.value == 0)
             {
               toWrite = 0;
             }
 
-            //send mouse event to gamepad
-            send_mouse_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, toWrite);
-
-            // send sync event
-            send_sync_event(gamepad_fd, gamepad_ev);
+            send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, toWrite);
           }
           if (mouse_event.code == REL_Y)
           {
             int toWrite = 0;
             if (mouse_event.value > 0)
             {
-              toWrite = MOUSE_SENSITIVITY;
+              //mouseMaxY -= mouseMaxY / 4;
+              //if (mouse_event.value > mouseMaxY) mouseMaxY = mouse_event.value;
+              toWrite = mouse_event.value * 32;//( mouse_event.value * MOUSE_SENSITIVITY ) / mouseMaxY;
+              if (toWrite > MOUSE_SENSITIVITY) toWrite = MOUSE_SENSITIVITY;
             }
             if (mouse_event.value < 0)
             {
-              toWrite = MOUSE_SENSITIVITY_NEGATIVE;
+              //mouseMinY -= mouseMinY / 4;
+              //if (mouse_event.value < mouseMinY) mouseMinY = mouse_event.value;
+              toWrite = mouse_event.value * 32;//( mouse_event.value * MOUSE_SENSITIVITY_NEGATIVE ) / mouseMinY;
+              if (toWrite < MOUSE_SENSITIVITY_NEGATIVE) toWrite = MOUSE_SENSITIVITY_NEGATIVE;
             }
             if (mouse_event.value == 0)
             {
               toWrite = 0;
             }
 
-            //send mouse event to gamepad
-            send_mouse_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, toWrite);
-
-            // send sync event
-            send_sync_event(gamepad_fd, gamepad_ev);
+            send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, toWrite);
           }
           break;
         case EV_KEY:
-          if (mouse_event.code == BTN_LEFT)
-          {
-            //send mouse event to gamepad
-            send_mouse_event(gamepad_fd, gamepad_ev, EV_KEY, BTN_TL2, mouse_event.value);
-            // send sync event
-            send_sync_event(gamepad_fd, gamepad_ev);
-          }
+          if (mouse_event.code == BTN_LEFT) send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_THUMBL, mouse_event.value);
+          if (mouse_event.code == BTN_RIGHT) send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_THUMBR, mouse_event.value);
+          
           // reset controller state
           if (mouse_event.code == BTN_MIDDLE)
           {
             printf("Middle button of mouse clicked!\n");
             
-            //send mouse event to gamepad
-            send_mouse_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, 0);
-
-            //send mouse event to gamepad
-            send_mouse_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, 0);
+            send_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, 0);
+            send_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, 0);
 
             // send one sync event for both axes
-            send_sync_event(gamepad_fd, gamepad_ev);
-          }
-          if (mouse_event.code == BTN_RIGHT)
-          {
-            //send mouse event to gamepad
-            send_mouse_event(gamepad_fd, gamepad_ev, EV_KEY, BTN_TR2, mouse_event.value);
-             
-            // send sync event
             send_sync_event(gamepad_fd, gamepad_ev);
           }
           break;
