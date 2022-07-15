@@ -1,11 +1,11 @@
 # ControllerEmulator
 An xbox controller emulator for linux.
 
-### Build ControllerEmulator
+### Build
 
 gcc emulator.c -o emulator
 
-### ControllerEmulator Usage
+### Usage
 
 sudo ./emulator --keyboard="PATH" --mouse="PATH"
 
