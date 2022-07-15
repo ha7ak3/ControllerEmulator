@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <argp.h>
 #include <fcntl.h>
 #include <linux/input.h>
 #include <linux/uinput.h>
@@ -13,9 +14,8 @@
 #include <signal.h>
 #include "keys.h"
 
-//The path to the keyboard and mouse (should look something like /dev/input/eventX)
-char KEYBOARD_PATH[] = "<YOUR-PATH>";
-char MOUSE_PATH[] = "<YOUR-PATH>";
+char KEYBOARD_PATH[256] = "???";
+char MOUSE_PATH[256] = "???";
 
 #define GAMEPAD_NAME "Virtual XPAD"
 
@@ -25,6 +25,33 @@ int MOUSE_SENSITIVITY = 512;//32767;//299;
 int MOUSE_SENSITIVITY_NEGATIVE = -512;//-32767;//-299;
 
 int absMultiplier = 8;
+
+static int parse_opt(int key, char *arg, struct argp_state *state)
+{
+  switch(key) {
+    case 'm':
+      if(strlen(arg)<256) strcpy(MOUSE_PATH,arg);
+      break;
+    case 'k':
+      if(strlen(arg)<256) strcpy(KEYBOARD_PATH,arg);
+      break;
+  }
+
+  return 0;
+}
+
+int parse_arguments(int argc, char**argv)
+{
+  struct argp_option options[] =
+  {
+    { "mouse", 'm', "PATH", 0, "The path to mouse (should look something like /dev/input/eventX)" },
+    { "keyboard", 'k', "PATH", 0, "The path to keyboard (should look something like /dev/input/eventX)" },
+    { 0 }
+  };
+  struct argp argp = { options, parse_opt };
+
+  return argp_parse (&argp, argc, argv, 0, 0, 0);
+}
 
 void exitFunc(int keyboard_fd, int mouse_fd, int gamepad_fd)
 {
@@ -72,6 +99,8 @@ void send_event_and_sync(int gamepad_fd, struct input_event gamepad_event, int T
 
 int main(int argc, char *argv[])
 {
+  parse_arguments(argc, argv);
+
   sleep(1);
   int rcode = 0;
 
@@ -79,7 +108,7 @@ int main(int argc, char *argv[])
   int keyboard_fd = open(KEYBOARD_PATH, O_RDONLY | O_NONBLOCK);
   if (keyboard_fd == -1)
   {
-    printf("Failed to open keyboard.\n");
+    printf("Failed to open keyboard -> %s\n",KEYBOARD_PATH);
     exit(1);
   }
   rcode = ioctl(keyboard_fd, EVIOCGNAME(sizeof(keyboard_name)), keyboard_name);
@@ -94,7 +123,7 @@ int main(int argc, char *argv[])
   int mouse_fd = open(MOUSE_PATH, O_RDWR | O_NOCTTY | O_NONBLOCK);
   if (mouse_fd == -1)
   {
-    printf("Failed to open mouse.\n");
+    printf("Failed to open mouse -> %s\n",MOUSE_PATH);
     exit(1);
   }
 
