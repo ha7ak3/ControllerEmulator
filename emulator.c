@@ -17,6 +17,8 @@
 char KEYBOARD_PATH[256] = "???";
 char MOUSE_PATH[256] = "???";
 
+bool VERBOSE = false;
+
 #define GAMEPAD_NAME "Virtual XPAD"
 
 bool q_pressed = false;
@@ -29,12 +31,9 @@ int absMultiplier = 8;
 static int parse_opt(int key, char *arg, struct argp_state *state)
 {
   switch(key) {
-    case 'm':
-      if(strlen(arg)<256) strcpy(MOUSE_PATH,arg);
-      break;
-    case 'k':
-      if(strlen(arg)<256) strcpy(KEYBOARD_PATH,arg);
-      break;
+    case 'm': if(strlen(arg)<256) strcpy(MOUSE_PATH,arg); break;
+    case 'k': if(strlen(arg)<256) strcpy(KEYBOARD_PATH,arg); break;
+    case 'v': VERBOSE = true; break;
   }
 
   return 0;
@@ -46,6 +45,7 @@ int parse_arguments(int argc, char**argv)
   {
     { "mouse", 'm', "PATH", 0, "The path to mouse (should look something like /dev/input/eventX)" },
     { "keyboard", 'k', "PATH", 0, "The path to keyboard (should look something like /dev/input/eventX)" },
+    {"verbose", 'v', 0, OPTION_ARG_OPTIONAL, "Show more info"},
     { 0 }
   };
   struct argp argp = { options, parse_opt };
@@ -73,7 +73,7 @@ void send_sync_event(int gamepad_fd, struct input_event gamepad_event)
 
   if(write(gamepad_fd, &gamepad_event, sizeof(struct input_event)) < 0)
   {
-    printf("error writing sync event\n");
+    printf("Error writing sync event\n");
   }
 }
 
@@ -88,6 +88,8 @@ void send_event(int gamepad_fd, struct input_event gamepad_event, int TYPE, int 
   if(write(gamepad_fd, &gamepad_event, sizeof(struct input_event)) < 0)
   {
     printf("Error writing event to gamepad!\n");
+  } else if(VERBOSE) {
+    printf("-> Gamepad: type %d code %d value %d ", gamepad_event.type, gamepad_event.code, gamepad_event.value);
   }
 }
 
@@ -112,7 +114,7 @@ int main(int argc, char *argv[])
     exit(1);
   }
   rcode = ioctl(keyboard_fd, EVIOCGNAME(sizeof(keyboard_name)), keyboard_name);
-  printf("Reading From : %s \n", keyboard_name);
+  printf("Reading from : %s \n", keyboard_name);
 
   //   printf("Getting exclusive access: ");
   //   rcode = ioctl(keyboard_fd, EVIOCGRAB, 1);
@@ -128,7 +130,7 @@ int main(int argc, char *argv[])
   }
 
   rcode = ioctl(mouse_fd, EVIOCGNAME(sizeof(mouse_name)), mouse_name);
-  printf("Reading From : %s \n", mouse_name);
+  printf("Reading from : %s \n", mouse_name);
 
   struct input_event mouse_event;
 
@@ -222,7 +224,10 @@ int main(int argc, char *argv[])
   
     if (read(keyboard_fd, &keyboard_event, sizeof(keyboard_event)) != -1)
     {
-      // printf("keyboard event: type %d code %d value %d  \n", keyboard_event.type, keyboard_event.code, keyboard_event.value);
+      if(VERBOSE) {
+        printf("Event: Keyboard: type %d code %d value %d ", keyboard_event.type, keyboard_event.code, keyboard_event.value);
+      }
+        
       if (keyboard_event.code == KEY_Q && keyboard_event.value == 1)
       {
         q_pressed = !q_pressed;
@@ -276,11 +281,16 @@ int main(int argc, char *argv[])
           send_sync_event(gamepad_fd, gamepad_ev);
         }
       }
+      
+      if(VERBOSE) printf("\n");
     }
 
     if (read(mouse_fd, &mouse_event, sizeof(struct input_event)) != -1)
     {
-      //printf("Mouse event: %d %d %d \n", mouse_event.code, mouse_event.type, mouse_event.value);
+      if(VERBOSE) {
+        printf("Event: Mouse: type %d code %d value %d ", mouse_event.type, mouse_event.code, mouse_event.value);
+      }
+      
       switch (mouse_event.type)
       {
       case EV_REL:
@@ -316,8 +326,6 @@ int main(int argc, char *argv[])
         // reset controller state
         if (mouse_event.code == BTN_MIDDLE)
         {
-          printf("Middle button of mouse clicked!\n");
-            
           send_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, 0);
           send_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, 0);
 
@@ -326,6 +334,8 @@ int main(int argc, char *argv[])
         }
         break;
       }
+      
+      if(VERBOSE) printf("\n");
     }
   }
 
