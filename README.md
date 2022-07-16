@@ -18,4 +18,4 @@ sudo ./mimic-xpad.sh "PATH"
 "PATH" -> The path to the emulated controller (should look something like /dev/input/eventX)
 
 This may be desirable for games that support Xbox 360 controllers out of the box, but have trouble detecting or working with other gamepads.
-click here for details: https://wiki.archlinux.org/title/Gamepad#Mimic_Xbox_360_controller
+click here for details: https://wiki.archlinux.org/title/Gamepad#Mimic_Xbox_360_controller_with_other_controllers
