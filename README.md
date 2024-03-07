@@ -1,21 +1,15 @@
 # ControllerEmulator
-An xbox controller emulator for linux.
+An Xbox One Controller emulator for linux. Mouse not supported yet.
 
 ### Build
 
-gcc emulator.c -o emulator
+gcc profiles.c -o emulator
 
 ### Usage
 
-sudo ./emulator --keyboard="PATH" --mouse="PATH"
+sudo ./emulator -k "DEVICE" [-v]
 
-"PATH" -> The path to the keyboard and mouse (should look something like /dev/input/eventX)
+"DEVICE" -> The path to the keyboard (should look something like /dev/input/eventX)
+            run "sudo evtest" to get your device path.
 
-##### if an application cannot recognize the controller:
-
-sudo ./mimic-xpad.sh "PATH"
-
-"PATH" -> The path to the emulated controller (should look something like /dev/input/eventX)
-
-This may be desirable for games that support Xbox 360 controllers out of the box, but have trouble detecting or working with other gamepads.
-click here for details: https://wiki.archlinux.org/title/Gamepad#Mimic_Xbox_360_controller_with_other_controllers
+   -v    -> To show more output. Useful for debugging.
