@@ -1,6 +1,7 @@
 #include <argp.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <gtk/gtk.h>
 #include <linux/input.h>
 #include <linux/uinput.h>
 #include <signal.h>
@@ -13,20 +14,20 @@
 #include <unistd.h>
 
 #include "keys.h"
+#define GAMEPAD_NAME "Microsoft Xbox One Gamepad"
 
-#define GAMEPAD_NAME "Microsoft Xbox Series S|X Controller"
-
+char *tooltip = "Virtual Xbox One Gamepad";
+char *start_icon = "applications-games-symbolic";
 char pathKeyboard[256] = "???";
-
-bool verbose = false;
-bool paused = false;
-int grab = 1;
 char xaxis = 0;
 char yaxis = 0;
 char rxaxis = 0;
 char ryaxis = 0;
-
+bool verbose = false;
+bool paused = false;
 int absMultiplier = 8;
+int grab = 1;
+GtkStatusIcon *icon;
 
 static int parse_opt(int key, char *arg, struct argp_state *state) {
   switch (key) {
@@ -89,7 +90,20 @@ void send_event_and_sync(int gamepad_fd, struct input_event gamepad_event, int T
   send_sync_event(gamepad_fd, gamepad_event);
 }
 
+void tray_icon_on_click(GtkStatusIcon *status_icon, gpointer user_data) { exit(EXIT_SUCCESS); }
+
+static GtkStatusIcon *create_tray_icon(char *start_icon, char *tooltip) {
+  GtkStatusIcon *tray_icon;
+  tray_icon = gtk_status_icon_new_from_icon_name(start_icon);
+  g_signal_connect(G_OBJECT(tray_icon), "activate", G_CALLBACK(tray_icon_on_click), NULL);
+  gtk_status_icon_set_visible(tray_icon, TRUE);
+  gtk_status_icon_set_tooltip_text(tray_icon, tooltip);
+  return tray_icon;
+}
+
 int main(int argc, char *argv[]) {
+  gtk_init(&argc, &argv);
+  icon = create_tray_icon(start_icon, tooltip);
   parse_arguments(argc, argv);
 
   sleep(1);
@@ -186,6 +200,7 @@ int main(int argc, char *argv[]) {
 
   while (1) {
     sleep(0.001);
+    gtk_main_iteration_do(FALSE);
 
     if (read(keyboard_fd, &keyboard_event, sizeof(keyboard_event)) != -1) {
       if (verbose) {
@@ -199,15 +214,17 @@ int main(int argc, char *argv[]) {
         usleep(100000);
         paused = !paused;
         if (paused) {
-          system("echo 'icon:media-playback-pause-symbolic' >/tmp/xipade.tray");
           // Reset Analog Sticks
           send_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_X, 0);
           send_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_Y, 0);
           send_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, 0);
           send_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, 0);
           send_sync_event(gamepad_fd, gamepad_ev);
+          // Pause Icon
+          gtk_status_icon_set_from_icon_name(icon, "media-playback-pause-symbolic");
         } else {
-          system("echo 'icon:applications-games-symbolic' >/tmp/xipade.tray");
+          // Gamepad Icon
+          gtk_status_icon_set_from_icon_name(icon, "applications-games-symbolic");
         }
       }
 
@@ -215,14 +232,6 @@ int main(int argc, char *argv[]) {
       if (keyboard_event.code == KEY_F12 && keyboard_event.value == 0) {
         exitFunc(keyboard_fd, gamepad_fd);
         break;
-      }
-
-      // Pass Keys
-      if (keyboard_event.code == KEY_SYSRQ && keyboard_event.value == 0) {  // Screenshot
-        system("xdotool key --clearmodifiers Print");
-      }
-      if (keyboard_event.code == KEY_SCROLLLOCK && keyboard_event.value == 0) {  // Replay
-        system("xdotool key --clearmodifiers Scroll_Lock");
       }
 
       if (!paused) {

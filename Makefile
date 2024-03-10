@@ -1,9 +1,6 @@
-xipade:
+xipade: emulator.c
 	@echo building emulator...
-	@gcc ./emulator.c -o xipade
+	@${CC} `pkg-config --cflags gtk+-3.0` -o $@ $< `pkg-config --libs gtk+-3.0` `pkg-config --cflags --libs x11`
 	@echo installing...
-	@chown root:root ./xipade
-	@chmod u+s ./xipade
-	@chmod 4755 ./xipade
 	@mv -f ./xipade /home/draxx/.local/bin/
 	@echo done.
