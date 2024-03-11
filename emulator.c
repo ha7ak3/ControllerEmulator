@@ -1,3 +1,4 @@
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include <argp.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -14,9 +15,8 @@
 #include <unistd.h>
 
 #include "keys.h"
-#define GAMEPAD_NAME "Microsoft Xbox One Gamepad"
-
-char *tooltip = "Virtual Xbox One Gamepad";
+#define GAMEPAD_NAME "Virtual Xbox Gamepad"
+char *tooltip = GAMEPAD_NAME;
 char *start_icon = "applications-games-symbolic";
 char pathKeyboard[256] = "???";
 char xaxis = 0;
@@ -25,7 +25,6 @@ char rxaxis = 0;
 char ryaxis = 0;
 bool verbose = false;
 bool paused = false;
-int absMultiplier = 8;
 int grab = 1;
 GtkStatusIcon *icon;
 
@@ -90,7 +89,10 @@ void send_event_and_sync(int gamepad_fd, struct input_event gamepad_event, int T
   send_sync_event(gamepad_fd, gamepad_event);
 }
 
-void tray_icon_on_click(GtkStatusIcon *status_icon, gpointer user_data) { exit(EXIT_SUCCESS); }
+void tray_icon_on_click(GtkStatusIcon *status_icon, gpointer user_data) {
+  printf("\nExiting.\n");
+  exit(EXIT_SUCCESS);
+}
 
 static GtkStatusIcon *create_tray_icon(char *start_icon, char *tooltip) {
   GtkStatusIcon *tray_icon;
@@ -166,7 +168,7 @@ int main(int argc, char *argv[]) {
   snprintf(uidev.name, UINPUT_MAX_NAME_SIZE, GAMEPAD_NAME);  // Name of Gamepad
   uidev.id.bustype = BUS_USB;
   uidev.id.vendor = 0x45e;
-  uidev.id.product = 0x0b12;
+  uidev.id.product = 0x28e;
   uidev.id.version = 0x110;
   uidev.absmax[ABS_X] = 32767;  // Parameters of thumbsticks
   uidev.absmin[ABS_X] = -32768;
