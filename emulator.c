@@ -51,11 +51,11 @@ int parse_arguments(int argc, char **argv) {
 }
 
 void exitFunc(int keyboard_fd, int gamepad_fd) {
-  close(keyboard_fd);
-  if (ioctl(gamepad_fd, UI_DEV_DESTROY) < 0) {
-    printf("Error destroying gamepad! \n");
-  }
-  close(gamepad_fd);
+  printf("\nExiting.\n");
+  ioctl(keyboard_fd, EVIOCGRAB, 0);  // Disable exclusive access
+  close(keyboard_fd);                // Close keyboard
+  close(gamepad_fd);                 // Close gamepad
+  exit(EXIT_SUCCESS);
 }
 
 void send_sync_event(int gamepad_fd, struct input_event gamepad_event) {
@@ -89,10 +89,7 @@ void send_event_and_sync(int gamepad_fd, struct input_event gamepad_event, int T
   send_sync_event(gamepad_fd, gamepad_event);
 }
 
-void tray_icon_on_click(GtkStatusIcon *status_icon, gpointer user_data) {
-  printf("\nExiting.\n");
-  exit(EXIT_SUCCESS);
-}
+void tray_icon_on_click(int keyboard_fd, int gamepad_fd) { exitFunc(keyboard_fd, gamepad_fd); }
 
 static GtkStatusIcon *create_tray_icon(char *start_icon, char *tooltip) {
   GtkStatusIcon *tray_icon;
@@ -104,9 +101,9 @@ static GtkStatusIcon *create_tray_icon(char *start_icon, char *tooltip) {
 }
 
 int main(int argc, char *argv[]) {
+  parse_arguments(argc, argv);
   gtk_init(&argc, &argv);
   icon = create_tray_icon(start_icon, tooltip);
-  parse_arguments(argc, argv);
 
   sleep(1);
   int rcode = 0;
@@ -170,7 +167,8 @@ int main(int argc, char *argv[]) {
   uidev.id.vendor = 0x45e;
   uidev.id.product = 0x28e;
   uidev.id.version = 0x110;
-  uidev.absmax[ABS_X] = 32767;  // Parameters of thumbsticks
+  // Parameters of thumbsticks
+  uidev.absmax[ABS_X] = 32767;
   uidev.absmin[ABS_X] = -32768;
   uidev.absfuzz[ABS_X] = 0;
   uidev.absflat[ABS_X] = 15;
@@ -375,11 +373,7 @@ int main(int argc, char *argv[]) {
 
         if (verbose) printf("\n");
       }  // paused
-    }    // keyboard_fd
-  }      // while
-
-  printf("\nExiting.\n");
-  rcode = ioctl(keyboard_fd, EVIOCGRAB, 0);
-  close(keyboard_fd);
+    }  // keyboard_fd
+  }  // while
   return 0;
 }  // main
