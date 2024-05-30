@@ -46,14 +46,15 @@ sudo ./emulator -k "DEVICE" [-v]
 
 ### Control Keys
 
-| KEY          | USAGE                           |               |
+| KEY          | USAGE                           | ALTERNATE     |
 |:------------:|:-------------------------------:|:-------------:|
-| F2           | Toggle Pause Controller to type |               |
-| F12          | Close Program                   |               |
+| F2           | Toggle Pause Controller to Type |               |
+| F12          | Close Program                   | Can be closed by clicking the tray icon |
 
 ### Credits
 
 Thanks to the original projects:
 
 https://github.com/niehoff90/ControllerEmulator
+
 https://github.com/duzda/TitanSoulsLinuxEmulator
