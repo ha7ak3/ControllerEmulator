@@ -3,11 +3,15 @@ An Xbox 360 Controller emulator for linux. Mouse not supported yet.
 
 ### Build
 
+```
 make
+```
+
+It will be installed in $HOME/.local/bin
 
 ### Usage
 
-sudo ./emulator -k "DEVICE" [-v]
+sudo ./xipad -k "DEVICE" [-v]
 
 "DEVICE" -> The path to the keyboard (should look something like /dev/input/eventX)
             run "sudo evtest" to get your device path.
