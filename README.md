@@ -3,7 +3,7 @@ An Xbox 360 Controller emulator for linux. Mouse not supported yet.
 
 ### Build
 
-gcc profiles.c -o emulator
+make
 
 ### Usage
 
