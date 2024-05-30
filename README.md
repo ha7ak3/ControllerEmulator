@@ -28,8 +28,8 @@ sudo ./emulator -k "DEVICE" [-v]
 | RB           | E                               | Y,LSHIFT      |
 | LT           | Z                               | SPACE,4       |
 | RT           | C                               | 6             |
-| LS(THUMB)    | TAB                             | 5             |
-| RS(THUMB)    | V                               |               |
+| LS Click     | TAB                             | 5             |
+| RS Click     | V                               |               |
 | DPAD_UP      | T                               |               |
 | DPAD_DOWN    | G                               |               |
 | DPAD_LEFT    | F                               |               |
