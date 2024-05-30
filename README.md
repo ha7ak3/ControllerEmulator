@@ -1,5 +1,5 @@
 # ControllerEmulator
-An Xbox One Controller emulator for linux. Mouse not supported yet.
+An Xbox 360 Controller emulator for linux. Mouse not supported yet.
 
 ### Build
 
@@ -13,3 +13,47 @@ sudo ./emulator -k "DEVICE" [-v]
             run "sudo evtest" to get your device path.
 
    -v    -> To show more output. Useful for debugging.
+
+### Default Buttons
+
+| Button       | Key                             | Alternate Key |
+|:------------:|:-------------------------------:|:-------------:|
+| A            | K                               |               |
+| B            | L                               |               |
+| X            | J                               |               |
+| Y            | I                               |               |
+| BACK         | X                               | B             |
+| START        | N                               |               |
+| LB           | Q                               | R             |
+| RB           | E                               | Y,LSHIFT      |
+| LT           | Z                               | SPACE,4       |
+| RT           | C                               | 6             |
+| LS(THUMB)    | TAB                             | 5             |
+| RS(THUMB)    | V                               |               |
+| DPAD_UP      | T                               |               |
+| DPAD_DOWN    | G                               |               |
+| DPAD_LEFT    | F                               |               |
+| DPAD_RIGHT   | H                               |               |
+| LSTICK_UP    | W                               |               |
+| LSTICK_DOWN  | S                               |               |
+| LSTICK_LEFT  | A                               |               |
+| LSTICK_RIGHT | D                               |               |
+| RSTICK_UP    | 1                               |               |
+| RSTICK_DOWN  | 2                               |               |
+| RSTICK_LEFT  | U                               |               |
+| RSTICK_RIGHT | O                               |               |
+| GUIDE        | ENTER                           |               |
+
+### Control Keys
+
+| KEY          | USAGE                           |               |
+|:------------:|:-------------------------------:|:-------------:|
+| F2           | Toggle Pause Controller to type |               |
+| F12          | Close Program                   |               |
+
+### Credits
+
+Thanks to the original projects:
+
+https://github.com/niehoff90/ControllerEmulator
+https://github.com/duzda/TitanSoulsLinuxEmulator
