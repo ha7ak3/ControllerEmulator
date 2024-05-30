@@ -53,8 +53,10 @@ sudo ./emulator -k "DEVICE" [-v]
 
 ### Credits
 
-Thanks to the original projects:
+Thanks to the original project:
 
 https://github.com/niehoff90/ControllerEmulator
+
+And this project for the analog sticks code:
 
 https://github.com/duzda/TitanSoulsLinuxEmulator
