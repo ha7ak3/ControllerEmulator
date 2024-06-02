@@ -42,8 +42,8 @@ sudo ./xipad -k "DEVICE" [-v]
 | LSTICK_DOWN  | S                               |               |
 | LSTICK_LEFT  | A                               |               |
 | LSTICK_RIGHT | D                               |               |
-| RSTICK_UP    | 1                               |               |
-| RSTICK_DOWN  | 2                               |               |
+| RSTICK_UP    | 1                               | 8             |
+| RSTICK_DOWN  | 2                               | 9             |
 | RSTICK_LEFT  | U                               |               |
 | RSTICK_RIGHT | O                               |               |
 | GUIDE        | ENTER                           |               |

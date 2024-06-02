@@ -281,9 +281,11 @@ int main(int argc, char *argv[]) {
               xaxis += 1;
               break;
             case KEY_1:
+            case KEY_8:
               ryaxis -= 1;
               break;
             case KEY_2:
+            case KEY_9:
               ryaxis += 1;
               break;
             case KEY_U:
@@ -308,9 +310,11 @@ int main(int argc, char *argv[]) {
               xaxis -= 1;
               break;
             case KEY_1:
+            case KEY_8:
               ryaxis += 1;
               break;
             case KEY_2:
+            case KEY_9:
               ryaxis -= 1;
               break;
             case KEY_U:
