@@ -210,22 +210,16 @@ int main(int argc, char *argv[]) {
       // Pause Gamepad Toggle (F2)
       if (keyboard_event.code == KEY_F2 && keyboard_event.value == 0) {
         grab = !grab;
-        rcode = ioctl(keyboard_fd, EVIOCGRAB, grab);
-        usleep(100000);
         paused = !paused;
+        rcode = ioctl(keyboard_fd, EVIOCGRAB, grab);
         if (paused) {
-          // Reset Analog Sticks
-          send_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_X, 0);
-          send_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_Y, 0);
-          send_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, 0);
-          send_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, 0);
-          send_sync_event(gamepad_fd, gamepad_ev);
           // Pause Icon
           gtk_status_icon_set_from_icon_name(icon, "media-playback-pause-symbolic");
         } else {
           // Gamepad Icon
           gtk_status_icon_set_from_icon_name(icon, "applications-games-symbolic");
         }
+        send_sync_event(gamepad_fd, gamepad_ev);  // reset gamepad
       }
 
       // Exit with F12 Key
