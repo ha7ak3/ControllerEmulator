@@ -231,8 +231,6 @@ int main(int argc, char *argv[]) {
       if (keyboard_event.code == KEY_F2 && keyboard_event.value == 0) {
         grab = !grab;
         paused = !paused;
-        waitReleaseAll(keyboard_fd);
-        rcode = ioctl(keyboard_fd, EVIOCGRAB, grab);
         if (paused) {
           // Pause Icon
           gtk_status_icon_set_from_icon_name(icon, "media-playback-pause-symbolic");
@@ -240,6 +238,8 @@ int main(int argc, char *argv[]) {
           // Gamepad Icon
           gtk_status_icon_set_from_icon_name(icon, "applications-games-symbolic");
         }
+        waitReleaseAll(keyboard_fd);
+        ioctl(keyboard_fd, EVIOCGRAB, grab);
       }
 
       // Exit with F12 Key
