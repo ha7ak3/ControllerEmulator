@@ -80,7 +80,7 @@ void send_event(int gamepad_fd, struct input_event gamepad_event, int TYPE, int 
   if (write(gamepad_fd, &gamepad_event, sizeof(struct input_event)) < 0) {
     printf("Error writing event to gamepad!\n");
   } else if (verbose) {
-    printf("-> Gamepad: type %d code %d value %d ", gamepad_event.type, gamepad_event.code, gamepad_event.value);
+    printf("> Gamepad: type %d code %d value %d \n", gamepad_event.type, gamepad_event.code, gamepad_event.value);
   }
 }
 
@@ -98,6 +98,25 @@ static GtkStatusIcon *create_tray_icon(char *start_icon, char *tooltip) {
   gtk_status_icon_set_visible(tray_icon, TRUE);
   gtk_status_icon_set_tooltip_text(tray_icon, tooltip);
   return tray_icon;
+}
+
+void waitReleaseAll(int fd) {
+  struct input_event evt;
+  unsigned char key_b[KEY_MAX / 8 + 1];
+  int i, nothing;
+  while (1) {
+    memset(key_b, 0, sizeof(key_b));
+    ioctl(fd, EVIOCGKEY(sizeof(key_b)), key_b);
+    for (nothing = 1, i = 0; i < KEY_MAX / 8 + 1; i++) {
+      if (key_b[i] != 0) {
+        nothing = 0;
+        break;
+      }
+    }
+    if (nothing) break;
+    read(fd, &evt, sizeof(evt));
+  }
+  if (verbose) printf("All keys are now released\n");
 }
 
 int main(int argc, char *argv[]) {
@@ -204,13 +223,15 @@ int main(int argc, char *argv[]) {
 
     if (read(keyboard_fd, &keyboard_event, sizeof(keyboard_event)) != -1) {
       if (verbose) {
-        printf("Event: Keyboard: type %d code %d value %d ", keyboard_event.type, keyboard_event.code, keyboard_event.value);
+        if (paused) printf("\n");
+        printf("> Keyboard: type %d code %d value %d \n", keyboard_event.type, keyboard_event.code, keyboard_event.value);
       }
 
       // Pause Gamepad Toggle (F2)
       if (keyboard_event.code == KEY_F2 && keyboard_event.value == 0) {
         grab = !grab;
         paused = !paused;
+        waitReleaseAll(keyboard_fd);
         rcode = ioctl(keyboard_fd, EVIOCGRAB, grab);
         if (paused) {
           // Pause Icon
@@ -219,7 +240,6 @@ int main(int argc, char *argv[]) {
           // Gamepad Icon
           gtk_status_icon_set_from_icon_name(icon, "applications-games-symbolic");
         }
-        send_sync_event(gamepad_fd, gamepad_ev);  // reset gamepad
       }
 
       // Exit with F12 Key
