@@ -232,13 +232,14 @@ int main(int argc, char *argv[]) {
         grab = !grab;
         paused = !paused;
         if (paused) {
+          waitReleaseAll(gamepad_fd);
           // Pause Icon
           gtk_status_icon_set_from_icon_name(icon, "media-playback-pause-symbolic");
         } else {
+          waitReleaseAll(keyboard_fd);
           // Gamepad Icon
           gtk_status_icon_set_from_icon_name(icon, "applications-games-symbolic");
         }
-        waitReleaseAll(keyboard_fd);
         ioctl(keyboard_fd, EVIOCGRAB, grab);
       }
 
