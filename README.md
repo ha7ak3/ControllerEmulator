@@ -1,5 +1,5 @@
 # ControllerEmulator
-An Xbox 360 Controller emulator for linux. Mouse not supported yet.
+An Xbox 360 Controller emulator for linux. (Keyboard only)
 
 ### Build
 
@@ -45,7 +45,7 @@ sudo ./xipad -k "DEVICE" [-v]
 | RSTICK_UP    | 1                               | 8             |
 | RSTICK_DOWN  | 2                               | 9             |
 | RSTICK_LEFT  | U                               |               |
-| RSTICK_RIGHT | O                               |               |
+| RSTICK_RIGHT | O                               | 3             |
 | GUIDE        | ENTER                           |               |
 
 ### Control Keys

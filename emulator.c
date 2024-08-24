@@ -307,6 +307,7 @@ int main(int argc, char *argv[]) {
               rxaxis -= 1;
               break;
             case KEY_O:
+            case KEY_3:
               rxaxis += 1;
               break;
           }
@@ -336,6 +337,7 @@ int main(int argc, char *argv[]) {
               rxaxis += 1;
               break;
             case KEY_O:
+            case KEY_3:
               rxaxis -= 1;
               break;
           }
