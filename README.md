@@ -23,7 +23,7 @@ sudo ./xipad -k "DEVICE" [-v]
 | Button       | Key                             | Alternate Key |
 |:------------:|:-------------------------------:|:-------------:|
 | A            | K                               |               |
-| B            | L                               |               |
+| B            | L                               | Left Alt      |
 | X            | J                               |               |
 | Y            | I                               |               |
 | BACK         | X                               | B             |
@@ -35,7 +35,7 @@ sudo ./xipad -k "DEVICE" [-v]
 | LS Click     | TAB                             | 5             |
 | RS Click     | V                               |               |
 | DPAD_UP      | T                               |               |
-| DPAD_DOWN    | G                               |               |
+| DPAD_DOWN    | G                               | .             |
 | DPAD_LEFT    | F                               |               |
 | DPAD_RIGHT   | H                               |               |
 | LSTICK_UP    | W                               |               |
@@ -45,7 +45,7 @@ sudo ./xipad -k "DEVICE" [-v]
 | RSTICK_UP    | 1                               | 8             |
 | RSTICK_DOWN  | 2                               | 9             |
 | RSTICK_LEFT  | U                               |               |
-| RSTICK_RIGHT | O                               | 3             |
+| RSTICK_RIGHT | O                               |               |
 | GUIDE        | ENTER                           |               |
 
 ### Control Keys
