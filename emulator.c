@@ -258,6 +258,7 @@ int main(int argc, char *argv[]) {
               send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_A, keyboard_event.value);
               break;
             case KEY_L:
+            case KEY_LEFTALT:
               send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_B, keyboard_event.value);
               break;
             case KEY_J:
@@ -307,7 +308,6 @@ int main(int argc, char *argv[]) {
               rxaxis -= 1;
               break;
             case KEY_O:
-            case KEY_3:
               rxaxis += 1;
               break;
           }
@@ -337,7 +337,6 @@ int main(int argc, char *argv[]) {
               rxaxis += 1;
               break;
             case KEY_O:
-            case KEY_3:
               rxaxis -= 1;
               break;
           }
@@ -382,6 +381,7 @@ int main(int argc, char *argv[]) {
             send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_DPAD_UP, keyboard_event.value);
             break;
           case KEY_G:
+          case KEY_DOT:
             send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_DPAD_DOWN, keyboard_event.value);
             break;
           case KEY_F:
