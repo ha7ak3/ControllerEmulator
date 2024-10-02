@@ -50,7 +50,7 @@ char rxaxis = 0;
 char ryaxis = 0;
 bool verbose = false;
 bool paused = false;
-bool layone = false;
+bool altlay = false;
 int grab = 1;
 GtkStatusIcon *icon;
 
@@ -62,8 +62,8 @@ static int parse_opt(int key, char *arg, struct argp_state *state) {
     case 'v':
       verbose = true;
       break;
-    case '1':
-      layone = true;
+    case 'l':
+      altlay = true;
       break;
   }
 
@@ -73,7 +73,7 @@ static int parse_opt(int key, char *arg, struct argp_state *state) {
 int parse_arguments(int argc, char **argv) {
   struct argp_option options[] = {{"keyboard", 'k', "PATH", 0, "The path to keyboard (should look something like /dev/input/eventX)"},
                                   {"verbose", 'v', 0, OPTION_ARG_OPTIONAL, "Show more info"},
-                                  {"layone", '1', 0, OPTION_ARG_OPTIONAL, "Use second buttons layout."},
+                                  {"altlay", 'l', 0, OPTION_ARG_OPTIONAL, "Use alternate buttons layout."},
                                   {0}};
   struct argp argp = {options, parse_opt};
 
@@ -149,8 +149,8 @@ void waitReleaseAll(int fd) {
   if (verbose) printf("All keys are now released\n");
 }
 
-void setLayoutOne() {
-  printf("Using second layout.\n");
+void setAltLayout() {
+  printf("Using alternate layout.\n");
   BA[0] = KEY_K;
   BA[1] = KEY_K;
   BA[2] = KEY_K;
@@ -233,8 +233,8 @@ int main(int argc, char *argv[]) {
   gtk_init(&argc, &argv);
   icon = create_tray_icon(start_icon, tooltip);
 
-  if (layone) {
-    setLayoutOne();
+  if (altlay) {
+    setAltLayout();
   }
 
   sleep(1);
