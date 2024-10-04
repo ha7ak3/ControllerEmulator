@@ -21,6 +21,7 @@ sudo ./xipad -k "DEVICE" [-v]
    -l    -> Alternate buttons layout.
    <details>
        <summary>Details</summary>
+       ````markdown
        | Button       | Key                             | Alternate Key |
        |:------------:|:-------------------------------:|:-------------:|
        | A            | K                               |               |
@@ -48,6 +49,7 @@ sudo ./xipad -k "DEVICE" [-v]
        | RSTICK_LEFT  | U                               |               |
        | RSTICK_RIGHT | O                               |               |
        | GUIDE        | ENTER                           |               |
+       ````
    </details>
 
 ###Default Buttons (US Keyboard Layout)
