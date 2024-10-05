@@ -51,6 +51,7 @@ char ryaxis = 0;
 bool verbose = false;
 bool paused = false;
 bool altlay = false;
+int rt_down = 0;
 int grab = 1;
 GtkStatusIcon *icon;
 
@@ -151,31 +152,10 @@ void waitReleaseAll(int fd) {
 
 void setAltLayout() {
   printf("Using alternate layout.\n");
-  BA[0] = KEY_K;
-  BA[1] = KEY_K;
-  BA[2] = KEY_K;
-  BB[0] = KEY_L;
-  BB[1] = KEY_L;
   BB[2] = KEY_L;
-  BX[0] = KEY_J;
-  BX[1] = KEY_J;
-  BX[2] = KEY_J;
-  BY[0] = KEY_I;
-  BY[1] = KEY_I;
   BY[2] = KEY_LEFTALT;
-  ST[0] = KEY_N;
-  ST[1] = KEY_N;
-  ST[2] = KEY_N;
-  BK[0] = KEY_X;
-  BK[1] = KEY_X;
   BK[2] = KEY_X;
-  GD[0] = KEY_ENTER;
-  GD[1] = KEY_ENTER;
-  GD[2] = KEY_ENTER;
-  LB[0] = KEY_Q;
-  LB[1] = KEY_Q;
   LB[2] = KEY_Q;
-  RB[0] = KEY_E;
   RB[1] = KEY_E;
   RB[2] = KEY_H;
   LT[0] = KEY_LEFTSHIFT;
@@ -196,36 +176,9 @@ void setAltLayout() {
   DD[0] = KEY_B;
   DD[1] = KEY_B;
   DD[2] = KEY_B;
-  DL[0] = KEY_F;
-  DL[1] = KEY_F;
-  DL[2] = KEY_F;
   DR[0] = KEY_V;
   DR[1] = KEY_V;
   DR[2] = KEY_V;
-  LU[0] = KEY_W;
-  LU[1] = KEY_W;
-  LU[2] = KEY_W;
-  LD[0] = KEY_S;
-  LD[1] = KEY_S;
-  LD[2] = KEY_S;
-  LL[0] = KEY_A;
-  LL[1] = KEY_A;
-  LL[2] = KEY_A;
-  LR[0] = KEY_D;
-  LR[1] = KEY_D;
-  LR[2] = KEY_D;
-  RU[0] = KEY_1;
-  RU[1] = KEY_1;
-  RU[2] = KEY_8;
-  RD[0] = KEY_2;
-  RD[1] = KEY_2;
-  RD[2] = KEY_9;
-  RL[0] = KEY_U;
-  RL[1] = KEY_U;
-  RL[2] = KEY_U;
-  RR[0] = KEY_O;
-  RR[1] = KEY_O;
-  RR[2] = KEY_O;
 }
 
 int main(int argc, char *argv[]) {
@@ -233,9 +186,7 @@ int main(int argc, char *argv[]) {
   gtk_init(&argc, &argv);
   icon = create_tray_icon(start_icon, tooltip);
 
-  if (altlay) {
-    setAltLayout();
-  }
+  if (altlay) setAltLayout();
 
   sleep(1);
   int rcode = 0;
@@ -400,6 +351,7 @@ int main(int argc, char *argv[]) {
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_TL2, keyboard_event.value);
         }
         if (keyboard_event.code == RT[0] || keyboard_event.code == RT[1] || keyboard_event.code == RT[2]) {
+          rt_down = keyboard_event.value == 2 ? 1 : 0;
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_TR2, keyboard_event.value);
         }
 
@@ -486,8 +438,13 @@ int main(int argc, char *argv[]) {
         send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_X, xaxis == 0 ? 0 : (xaxis == 1 ? 32767 : -32768));
         send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_Y, yaxis == 0 ? 0 : (yaxis == 1 ? 32767 : -32768));
         /* Right Stick */
-        send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, rxaxis == 0 ? 0 : (rxaxis == 1 ? 32767 : -32768));
-        send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, ryaxis == 0 ? 0 : (ryaxis == 1 ? 32767 : -32768));
+        if (rt_down == 1 && altlay) {
+          send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, rxaxis == 0 ? 0 : (rxaxis == 1 ? 288 : -288));
+          send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, ryaxis == 0 ? 0 : (ryaxis == 1 ? 288 : -288));
+        } else {
+          send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, rxaxis == 0 ? 0 : (rxaxis == 1 ? 512 : -512));
+          send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, ryaxis == 0 ? 0 : (ryaxis == 1 ? 512 : -512));
+        }
 
         if (verbose) printf("\n");
       }  // paused
