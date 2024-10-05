@@ -19,38 +19,6 @@ sudo ./xipad -k "DEVICE" [-v]
    -v    -> To show more output. Useful for debugging.
 
    -l    -> Alternate buttons layout.
-   <details>
-       <summary>Details</summary>
-       ````markdown
-       | Button       | Key                             | Alternate Key |
-       |:------------:|:-------------------------------:|:-------------:|
-       | A            | K                               |               |
-       | B            | L                               |               |
-       | X            | J                               |               |
-       | Y            | I                               | LALT          |
-       | BACK         | X                               |               |
-       | START        | N                               |               |
-       | LB           | Q                               | H             |
-       | RB           | E                               |               |
-       | LT           | LSHIFT                          |               |
-       | RT           | SPACE                           |               |
-       | LS Click     | C                               |               |
-       | RS Click     | Z                               |               |
-       | DPAD_UP      | R                               |               |
-       | DPAD_DOWN    | B                               |               |
-       | DPAD_LEFT    | F                               |               |
-       | DPAD_RIGHT   | V                               |               |
-       | LSTICK_UP    | W                               |               |
-       | LSTICK_DOWN  | S                               |               |
-       | LSTICK_LEFT  | A                               |               |
-       | LSTICK_RIGHT | D                               |               |
-       | RSTICK_UP    | 1                               | 8             |
-       | RSTICK_DOWN  | 2                               | 9             |
-       | RSTICK_LEFT  | U                               |               |
-       | RSTICK_RIGHT | O                               |               |
-       | GUIDE        | ENTER                           |               |
-       ````
-   </details>
 
 ###Default Buttons (US Keyboard Layout)
 
