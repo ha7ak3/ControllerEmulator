@@ -11,7 +11,9 @@ It will be installed in $HOME/.local/bin
 
 ### Usage
 
-sudo ./xipad -k "DEVICE" [-v]
+```
+sudo xipad -k "DEVICE" [-v]
+```
 
 "DEVICE" -> The path to the keyboard (should look something like /dev/input/eventX)
             run "sudo evtest" to get your device path.
@@ -20,7 +22,7 @@ sudo ./xipad -k "DEVICE" [-v]
 
    -l    -> Alternate buttons layout.
 
-###Default Buttons (US Keyboard Layout)
+### Default Buttons (US Keyboard Layout)
 
 | Button       | Key                             | Alternate Key |
 |:------------:|:-------------------------------:|:-------------:|
