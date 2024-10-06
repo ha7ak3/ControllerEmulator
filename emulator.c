@@ -5,42 +5,16 @@
 #include <gtk/gtk.h>
 #include <linux/input.h>
 #include <linux/uinput.h>
-#include <signal.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
-#include <unistd.h>
 
 #include "keys.h"
 #define GAMEPAD_NAME "Virtual Xbox Gamepad"
-int BA[] = {KEY_K, KEY_K, KEY_K};
-int BB[] = {KEY_L, KEY_L, KEY_LEFTALT};
-int BX[] = {KEY_J, KEY_J, KEY_J};
-int BY[] = {KEY_I, KEY_I, KEY_I};
-int ST[] = {KEY_N, KEY_N, KEY_N};
-int BK[] = {KEY_X, KEY_X, KEY_B};
-int GD[] = {KEY_ENTER, KEY_ENTER, KEY_ENTER};
-int LB[] = {KEY_Q, KEY_Q, KEY_R};
-int RB[] = {KEY_E, KEY_Y, KEY_LEFTSHIFT};
-int LT[] = {KEY_Z, KEY_4, KEY_SPACE};
-int RT[] = {KEY_C, KEY_C, KEY_6};
-int TL[] = {KEY_TAB, KEY_TAB, KEY_5};
-int TR[] = {KEY_V, KEY_V, KEY_V};
-int DU[] = {KEY_T, KEY_T, KEY_T};
-int DD[] = {KEY_G, KEY_G, KEY_DOT};
-int DL[] = {KEY_F, KEY_F, KEY_F};
-int DR[] = {KEY_H, KEY_H, KEY_H};
-int LU[] = {KEY_W, KEY_W, KEY_W};
-int LD[] = {KEY_S, KEY_S, KEY_S};
-int LL[] = {KEY_A, KEY_A, KEY_A};
-int LR[] = {KEY_D, KEY_D, KEY_D};
-int RU[] = {KEY_1, KEY_1, KEY_8};
-int RD[] = {KEY_2, KEY_2, KEY_9};
-int RL[] = {KEY_U, KEY_U, KEY_U};
-int RR[] = {KEY_O, KEY_O, KEY_O};
+int BA[3], BB[3], BX[3], BY[3], ST[3], BK[3], GD[3], LB[3], RB[3], LT[3], RT[3], TL[3], TR[3];
+int DU[3], DD[3], DL[3], DR[3], LU[3], LD[3], LL[3], LR[3], RU[3], RD[3], RL[3], RR[3];
 char *tooltip = GAMEPAD_NAME;
 char *start_icon = "applications-games-symbolic";
 char pathKeyboard[256] = "???";
@@ -150,35 +124,73 @@ void waitReleaseAll(int fd) {
   if (verbose) printf("All keys are now released\n");
 }
 
+void setLayout() {
+  printf("Using default layout.\n");
+  BA[0] = KEY_K, BA[1] = KEY_UNKNOWN, BA[2] = KEY_UNKNOWN;
+  BB[0] = KEY_L, BB[1] = KEY_LEFTALT, BB[2] = KEY_UNKNOWN;
+  BX[0] = KEY_J, BX[1] = KEY_UNKNOWN, BX[2] = KEY_UNKNOWN;
+  BY[0] = KEY_I, BY[1] = KEY_UNKNOWN, BY[2] = KEY_UNKNOWN;
+  ST[0] = KEY_N, ST[1] = KEY_UNKNOWN, ST[2] = KEY_UNKNOWN;
+  BK[0] = KEY_X, BK[1] = KEY_B, BK[2] = KEY_UNKNOWN;
+  GD[0] = KEY_ENTER, GD[1] = KEY_UNKNOWN, GD[2] = KEY_UNKNOWN;
+  LB[0] = KEY_Q, LB[1] = KEY_R, LB[2] = KEY_UNKNOWN;
+  RB[0] = KEY_E, RB[1] = KEY_Y, RB[2] = KEY_LEFTSHIFT;
+  LT[0] = KEY_Z, LT[1] = KEY_4, LT[2] = KEY_SPACE;
+  RT[0] = KEY_C, RT[1] = KEY_6, RT[2] = KEY_UNKNOWN;
+  TL[0] = KEY_TAB, TL[1] = KEY_5, TL[2] = KEY_UNKNOWN;
+  TR[0] = KEY_V, TR[1] = KEY_UNKNOWN, TR[2] = KEY_UNKNOWN;
+  DU[0] = KEY_T, DU[1] = KEY_UNKNOWN, DU[2] = KEY_UNKNOWN;
+  DD[0] = KEY_G, DD[1] = KEY_UNKNOWN, DD[2] = KEY_UNKNOWN;
+  DL[0] = KEY_F, DL[1] = KEY_UNKNOWN, DL[2] = KEY_UNKNOWN;
+  DR[0] = KEY_H, DR[1] = KEY_UNKNOWN, DR[2] = KEY_UNKNOWN;
+  LU[0] = KEY_W, LU[1] = KEY_UNKNOWN, LU[2] = KEY_UNKNOWN;
+  LD[0] = KEY_S, LD[1] = KEY_UNKNOWN, LD[2] = KEY_UNKNOWN;
+  LL[0] = KEY_A, LL[1] = KEY_UNKNOWN, LL[2] = KEY_UNKNOWN;
+  LR[0] = KEY_D, LR[1] = KEY_UNKNOWN, LR[2] = KEY_UNKNOWN;
+  RU[0] = KEY_1, RU[1] = KEY_8, RU[2] = KEY_UNKNOWN;
+  RD[0] = KEY_2, RD[1] = KEY_9, RD[2] = KEY_UNKNOWN;
+  RL[0] = KEY_U, RL[1] = KEY_UNKNOWN, RL[2] = KEY_UNKNOWN;
+  RR[0] = KEY_O, RR[1] = KEY_UNKNOWN, RR[2] = KEY_UNKNOWN;
+}
+
 void setAltLayout() {
   printf("Using alternate layout.\n");
-  BB[2] = KEY_L;
-  BY[2] = KEY_LEFTALT;
-  BK[2] = KEY_X;
-  LB[2] = KEY_Q;
-  RB[1] = KEY_E;
-  RB[2] = KEY_H;
-  LT[0] = KEY_LEFTSHIFT;
-  LT[1] = KEY_LEFTSHIFT;
-  LT[2] = KEY_LEFTSHIFT;
-  RT[0] = KEY_SPACE;
-  RT[1] = KEY_SPACE;
-  RT[2] = KEY_SPACE;
-  TL[0] = KEY_C;
-  TL[1] = KEY_C;
-  TL[2] = KEY_C;
-  TR[0] = KEY_Z;
-  TR[1] = KEY_Z;
-  TR[2] = KEY_Z;
-  DU[0] = KEY_R;
-  DU[1] = KEY_R;
-  DU[2] = KEY_R;
-  DD[0] = KEY_B;
-  DD[1] = KEY_B;
-  DD[2] = KEY_B;
-  DR[0] = KEY_V;
-  DR[1] = KEY_V;
-  DR[2] = KEY_V;
+  BA[0] = KEY_K, BA[1] = KEY_UNKNOWN, BA[2] = KEY_UNKNOWN;
+  BB[0] = KEY_L, BB[1] = KEY_UNKNOWN, BB[2] = KEY_UNKNOWN;
+  BX[0] = KEY_J, BX[1] = KEY_UNKNOWN, BX[2] = KEY_UNKNOWN;
+  BY[0] = KEY_I, BY[1] = KEY_LEFTALT, BY[2] = KEY_UNKNOWN;
+  ST[0] = KEY_N, ST[1] = KEY_UNKNOWN, ST[2] = KEY_UNKNOWN;
+  BK[0] = KEY_X, BK[1] = KEY_UNKNOWN, BK[2] = KEY_UNKNOWN;
+  GD[0] = KEY_ENTER, GD[1] = KEY_UNKNOWN, GD[2] = KEY_UNKNOWN;
+  LB[0] = KEY_Q, LB[1] = KEY_UNKNOWN, LB[2] = KEY_UNKNOWN;
+  RB[0] = KEY_E, RB[1] = KEY_H, RB[2] = KEY_UNKNOWN;
+  LT[0] = KEY_LEFTSHIFT, LT[1] = KEY_UNKNOWN, LT[2] = KEY_UNKNOWN;
+  RT[0] = KEY_SPACE, RT[1] = KEY_UNKNOWN, RT[2] = KEY_UNKNOWN;
+  TL[0] = KEY_C, TL[1] = KEY_UNKNOWN, TL[2] = KEY_UNKNOWN;
+  TR[0] = KEY_Z, TR[1] = KEY_UNKNOWN, TR[2] = KEY_UNKNOWN;
+  DU[0] = KEY_R, DU[1] = KEY_UNKNOWN, DU[2] = KEY_UNKNOWN;
+  DD[0] = KEY_B, DD[1] = KEY_UNKNOWN, DD[2] = KEY_UNKNOWN;
+  DL[0] = KEY_F, DL[1] = KEY_UNKNOWN, DL[2] = KEY_UNKNOWN;
+  DR[0] = KEY_V, DR[1] = KEY_UNKNOWN, DR[2] = KEY_UNKNOWN;
+  LU[0] = KEY_W, LU[1] = KEY_UNKNOWN, LU[2] = KEY_UNKNOWN;
+  LD[0] = KEY_S, LD[1] = KEY_UNKNOWN, LD[2] = KEY_UNKNOWN;
+  LL[0] = KEY_A, LL[1] = KEY_UNKNOWN, LL[2] = KEY_UNKNOWN;
+  LR[0] = KEY_D, LR[1] = KEY_UNKNOWN, LR[2] = KEY_UNKNOWN;
+  RU[0] = KEY_1, RU[1] = KEY_8, RU[2] = KEY_UNKNOWN;
+  RD[0] = KEY_2, RD[1] = KEY_9, RD[2] = KEY_UNKNOWN;
+  RL[0] = KEY_U, RL[1] = KEY_UNKNOWN, RL[2] = KEY_UNKNOWN;
+  RR[0] = KEY_O, RR[1] = KEY_UNKNOWN, RR[2] = KEY_UNKNOWN;
+}
+
+bool checkButton(int buttons[], int key) {
+  bool match = false;
+  for (int i = 0; i < 3; ++i) {
+    if (buttons[i] == key) {
+      match = true;
+      break;
+    }
+  }
+  return match;
 }
 
 int main(int argc, char *argv[]) {
@@ -186,7 +198,11 @@ int main(int argc, char *argv[]) {
   gtk_init(&argc, &argv);
   icon = create_tray_icon(start_icon, tooltip);
 
-  if (altlay) setAltLayout();
+  if (altlay) {
+    setAltLayout();
+  } else {
+    setLayout();
+  }
 
   sleep(1);
   int rcode = 0;
@@ -317,63 +333,63 @@ int main(int argc, char *argv[]) {
         /* Face Buttons */
         if (keyboard_event.value != 2)  // only care about button press and not hold
         {
-          if (keyboard_event.code == BA[0] || keyboard_event.code == BA[1] || keyboard_event.code == BA[2]) {
+          if (checkButton(BA, keyboard_event.code)) {
             send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_A, keyboard_event.value);
           }
-          if (keyboard_event.code == BB[0] || keyboard_event.code == BB[1] || keyboard_event.code == BB[2]) {
+          if (checkButton(BB, keyboard_event.code)) {
             send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_B, keyboard_event.value);
           }
-          if (keyboard_event.code == BX[0] || keyboard_event.code == BX[1] || keyboard_event.code == BX[2]) {
+          if (checkButton(BX, keyboard_event.code)) {
             send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_X, keyboard_event.value);
           }
-          if (keyboard_event.code == BY[0] || keyboard_event.code == BY[1] || keyboard_event.code == BY[2]) {
+          if (checkButton(BY, keyboard_event.code)) {
             send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_Y, keyboard_event.value);
           }
-          if (keyboard_event.code == ST[0] || keyboard_event.code == ST[1] || keyboard_event.code == ST[2]) {
+          if (checkButton(ST, keyboard_event.code)) {
             send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_START, keyboard_event.value);
           }
-          if (keyboard_event.code == BK[0] || keyboard_event.code == BK[1] || keyboard_event.code == BK[2]) {
+          if (checkButton(BK, keyboard_event.code)) {
             send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_SELECT, keyboard_event.value);
           }
-          if (keyboard_event.code == GD[0] || keyboard_event.code == GD[1] || keyboard_event.code == GD[2]) {
+          if (checkButton(GD, keyboard_event.code)) {
             send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_MODE, keyboard_event.value);
           }
         }
 
         /* TRIGGERS and BUMPERS */
-        if (keyboard_event.code == LB[0] || keyboard_event.code == LB[1] || keyboard_event.code == LB[2]) {
+        if (checkButton(LB, keyboard_event.code)) {
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_TL, keyboard_event.value);
         }
-        if (keyboard_event.code == RB[0] || keyboard_event.code == RB[1] || keyboard_event.code == RB[2]) {
+        if (checkButton(RB, keyboard_event.code)) {
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_TR, keyboard_event.value);
         }
-        if (keyboard_event.code == LT[0] || keyboard_event.code == LT[1] || keyboard_event.code == LT[2]) {
+        if (checkButton(LT, keyboard_event.code)) {
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_TL2, keyboard_event.value);
         }
-        if (keyboard_event.code == RT[0] || keyboard_event.code == RT[1] || keyboard_event.code == RT[2]) {
+        if (checkButton(RT, keyboard_event.code)) {
           rt_down = keyboard_event.value == 2 ? 1 : 0;
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_TR2, keyboard_event.value);
         }
 
         /* L3 and R3 */
-        if (keyboard_event.code == TL[0] || keyboard_event.code == TL[1] || keyboard_event.code == TL[2]) {
+        if (checkButton(TL, keyboard_event.code)) {
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_THUMBL, keyboard_event.value);
         }
-        if (keyboard_event.code == TR[0] || keyboard_event.code == TR[1] || keyboard_event.code == TR[2]) {
+        if (checkButton(TR, keyboard_event.code)) {
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_THUMBR, keyboard_event.value);
         }
 
         /* DPAD */
-        if (keyboard_event.code == DU[0] || keyboard_event.code == DU[1] || keyboard_event.code == DU[2]) {
+        if (checkButton(DU, keyboard_event.code)) {
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_DPAD_UP, keyboard_event.value);
         }
-        if (keyboard_event.code == DD[0] || keyboard_event.code == DD[1] || keyboard_event.code == DD[2]) {
+        if (checkButton(DD, keyboard_event.code)) {
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_DPAD_DOWN, keyboard_event.value);
         }
-        if (keyboard_event.code == DL[0] || keyboard_event.code == DL[1] || keyboard_event.code == DL[2]) {
+        if (checkButton(DL, keyboard_event.code)) {
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_DPAD_LEFT, keyboard_event.value);
         }
-        if (keyboard_event.code == DR[0] || keyboard_event.code == DR[1] || keyboard_event.code == DR[2]) {
+        if (checkButton(DR, keyboard_event.code)) {
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_DPAD_RIGHT, keyboard_event.value);
         }
 
@@ -381,56 +397,56 @@ int main(int argc, char *argv[]) {
         bool pressedOrHold = keyboard_event.value == 4 || keyboard_event.value == 1;
         if (pressedOrHold) {
           // Left
-          if (keyboard_event.code == LU[0] || keyboard_event.code == LU[1] || keyboard_event.code == LU[2]) {
+          if (checkButton(LU, keyboard_event.code)) {
             yaxis -= 1;
           }
-          if (keyboard_event.code == LD[0] || keyboard_event.code == LD[1] || keyboard_event.code == LD[2]) {
+          if (checkButton(LD, keyboard_event.code)) {
             yaxis += 1;
           }
-          if (keyboard_event.code == LL[0] || keyboard_event.code == LL[1] || keyboard_event.code == LL[2]) {
+          if (checkButton(LL, keyboard_event.code)) {
             xaxis -= 1;
           }
-          if (keyboard_event.code == LR[0] || keyboard_event.code == LR[1] || keyboard_event.code == LR[2]) {
+          if (checkButton(LR, keyboard_event.code)) {
             xaxis += 1;
           }
           // Right
-          if (keyboard_event.code == RU[0] || keyboard_event.code == RU[1] || keyboard_event.code == RU[2]) {
+          if (checkButton(RU, keyboard_event.code)) {
             ryaxis -= 1;
           }
-          if (keyboard_event.code == RD[0] || keyboard_event.code == RD[1] || keyboard_event.code == RD[2]) {
+          if (checkButton(RD, keyboard_event.code)) {
             ryaxis += 1;
           }
-          if (keyboard_event.code == RL[0] || keyboard_event.code == RL[1] || keyboard_event.code == RL[2]) {
+          if (checkButton(RL, keyboard_event.code)) {
             rxaxis -= 1;
           }
-          if (keyboard_event.code == RR[0] || keyboard_event.code == RR[1] || keyboard_event.code == RR[2]) {
+          if (checkButton(RR, keyboard_event.code)) {
             rxaxis += 1;
           }
         } else if (keyboard_event.value == 0) {
           // Left
-          if (keyboard_event.code == LU[0] || keyboard_event.code == LU[1] || keyboard_event.code == LU[2]) {
+          if (checkButton(LU, keyboard_event.code)) {
             yaxis += 1;
           }
-          if (keyboard_event.code == LD[0] || keyboard_event.code == LD[1] || keyboard_event.code == LD[2]) {
+          if (checkButton(LD, keyboard_event.code)) {
             yaxis -= 1;
           }
-          if (keyboard_event.code == LL[0] || keyboard_event.code == LL[1] || keyboard_event.code == LL[2]) {
+          if (checkButton(LL, keyboard_event.code)) {
             xaxis += 1;
           }
-          if (keyboard_event.code == LR[0] || keyboard_event.code == LR[1] || keyboard_event.code == LR[2]) {
+          if (checkButton(LR, keyboard_event.code)) {
             xaxis -= 1;
           }
           // Right
-          if (keyboard_event.code == RU[0] || keyboard_event.code == RU[1] || keyboard_event.code == RU[2]) {
+          if (checkButton(RU, keyboard_event.code)) {
             ryaxis += 1;
           }
-          if (keyboard_event.code == RD[0] || keyboard_event.code == RD[1] || keyboard_event.code == RD[2]) {
+          if (checkButton(RD, keyboard_event.code)) {
             ryaxis -= 1;
           }
-          if (keyboard_event.code == RL[0] || keyboard_event.code == RL[1] || keyboard_event.code == RL[2]) {
+          if (checkButton(RL, keyboard_event.code)) {
             rxaxis += 1;
           }
-          if (keyboard_event.code == RR[0] || keyboard_event.code == RR[1] || keyboard_event.code == RR[2]) {
+          if (checkButton(RR, keyboard_event.code)) {
             rxaxis -= 1;
           }
         }
