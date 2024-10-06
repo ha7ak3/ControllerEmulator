@@ -12,7 +12,7 @@ It will be installed in $HOME/.local/bin
 ### Usage
 
 ```
-sudo xipad -k "DEVICE" [-v]
+sudo xipade -k "DEVICE" [-v]
 ```
 
 "DEVICE" -> The path to the keyboard (should look something like /dev/input/eventX)
