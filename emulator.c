@@ -26,6 +26,7 @@ bool verbose = false;
 bool paused = false;
 bool altlay = false;
 int rt_down = 0;
+int lt_down = 0;
 int grab = 1;
 GtkStatusIcon *icon;
 
@@ -364,6 +365,7 @@ int main(int argc, char *argv[]) {
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_TR, keyboard_event.value);
         }
         if (checkButton(LT, keyboard_event.code)) {
+          lt_down = keyboard_event.value == 2 ? 1 : 0;
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_TL2, keyboard_event.value);
         }
         if (checkButton(RT, keyboard_event.code)) {
@@ -455,6 +457,9 @@ int main(int argc, char *argv[]) {
         send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_Y, yaxis == 0 ? 0 : (yaxis == 1 ? 32767 : -32768));
         /* Right Stick */
         if (rt_down == 1 && altlay) {
+          send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, rxaxis == 0 ? 0 : (rxaxis == 1 ? 288 : -288));
+          send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, ryaxis == 0 ? 0 : (ryaxis == 1 ? 288 : -288));
+        } else if (lt_down == 1 && !altlay) {
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, rxaxis == 0 ? 0 : (rxaxis == 1 ? 288 : -288));
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, ryaxis == 0 ? 0 : (ryaxis == 1 ? 288 : -288));
         } else {
