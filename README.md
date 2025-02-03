@@ -89,6 +89,11 @@ sudo xipade -k "DEVICE" [-v]
 | F2           | Toggle Pause Controller to Type |               |
 | F12          | Close Program                   | Can be closed by clicking the tray icon |
 
+### Fix Wrong Inputs
+```
+export SDL_GAMECONTROLLERCONFIG="030000005e0400008e02000010010000,Xbox 360 Controller,platform:Linux,a:b0,b:b1,x:b2,y:b3,back:b8,guide:b10,start:b9,leftstick:b11,rightstick:b12,leftshoulder:b4,rightshoulder:b5,dpup:b13,dpdown:b14,dpleft:b15,dpright:b16,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:b6,righttrigger:b7,"
+```
+
 ### Run without sudo (Linux Mint)
 
 ```
