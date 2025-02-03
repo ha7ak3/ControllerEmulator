@@ -22,7 +22,7 @@ sudo xipade -k "DEVICE" [-v]
 
    -l    -> Alternate buttons layout.
 
-### Default Buttons (US Keyboard Layout)
+### Default Layout (US Keyboard Layout)
 
 | Button       | Key                             | Alternate Key |
 |:------------:|:-------------------------------:|:-------------:|
@@ -52,12 +52,57 @@ sudo xipade -k "DEVICE" [-v]
 | RSTICK_RIGHT | O                               |               |
 | GUIDE        | ENTER                           |               |
 
+### Alternate Layout (US Keyboard Layout)
+
+| Button       | Key                             | Alternate Key |
+|:------------:|:-------------------------------:|:-------------:|
+| A            | K                               |               |
+| B            | L                               |               |
+| X            | J                               |               |
+| Y            | I                               | LALT          |
+| BACK         | X                               |               |
+| START        | N                               |               |
+| LB           | Q                               | R             |
+| RB           | E                               | Y             |
+| LT           | LSHIFT                          | 4             |
+| RT           | SPACE                           | 6             |
+| LS Click     | C                               |               |
+| RS Click     | Z                               | TAB           |
+| DPAD_UP      | T                               |               |
+| DPAD_DOWN    | G                               |               |
+| DPAD_LEFT    | F                               |               |
+| DPAD_RIGHT   | H                               |               |
+| LSTICK_UP    | W                               |               |
+| LSTICK_DOWN  | S                               |               |
+| LSTICK_LEFT  | A                               |               |
+| LSTICK_RIGHT | D                               |               |
+| RSTICK_UP    | 1                               | 8             |
+| RSTICK_DOWN  | 2                               | 9             |
+| RSTICK_LEFT  | U                               |               |
+| RSTICK_RIGHT | O                               |               |
+| GUIDE        | ENTER                           |               |
+
 ### Control Keys
 
 | KEY          | USAGE                           | ALTERNATE     |
 |:------------:|:-------------------------------:|:-------------:|
 | F2           | Toggle Pause Controller to Type |               |
 | F12          | Close Program                   | Can be closed by clicking the tray icon |
+
+### Run without sudo (Linux Mint)
+
+```
+sudo usermod -a -G input $USER
+sudo groupadd -f uinput
+sudo gpasswd -a $USER uinput
+```
+
+In /etc/udev/rules.d/ create a new rule file (99-uinput.rules) and within put this line:
+```
+KERNEL=="uinput", GROUP="uinput", MODE="0660"
+```
+
+Save and Reboot.
 
 ### Credits
 
