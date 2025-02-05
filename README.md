@@ -67,9 +67,9 @@ sudo xipade -k "DEVICE" [-v]
 | LT           | LSHIFT                          | 4             |
 | RT           | SPACE                           | 6             |
 | LS Click     | C                               |               |
-| RS Click     | Z                               | TAB           |
-| DPAD_UP      | T                               |               |
-| DPAD_DOWN    | G                               |               |
+| RS Click     | Z                               |               |
+| DPAD_UP      | T                               | TAB           |
+| DPAD_DOWN    | G                               | .             |
 | DPAD_LEFT    | F                               |               |
 | DPAD_RIGHT   | H                               |               |
 | LSTICK_UP    | W                               |               |
@@ -94,7 +94,7 @@ sudo xipade -k "DEVICE" [-v]
 export SDL_GAMECONTROLLERCONFIG="030000005e0400008e02000010010000,Xbox 360 Controller,platform:Linux,a:b0,b:b1,x:b2,y:b3,back:b8,guide:b10,start:b9,leftstick:b11,rightstick:b12,leftshoulder:b4,rightshoulder:b5,dpup:b13,dpdown:b14,dpleft:b15,dpright:b16,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:b6,righttrigger:b7,"
 ```
 
-### Run without sudo (Linux Mint)
+### Run without Root (Linux Mint)
 
 ```
 sudo usermod -a -G input $USER
