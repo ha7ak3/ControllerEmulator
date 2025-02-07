@@ -12,7 +12,7 @@
 #include <string.h>
 
 #include "keys.h"
-#define GAMEPAD_NAME "Virtual Xbox Gamepad"
+#define GAMEPAD_NAME "Virtual Xinput Gamepad"
 int BA[3], BB[3], BX[3], BY[3], ST[3], BK[3], GD[3], LB[3], RB[3], LT[3], RT[3], TL[3], TR[3];
 int DU[3], DD[3], DL[3], DR[3], LU[3], LD[3], LL[3], LR[3], RU[3], RD[3], RL[3], RR[3];
 char *tooltip = GAMEPAD_NAME;
