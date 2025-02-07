@@ -1,5 +1,5 @@
 # ControllerEmulator
-An Xbox 360 Controller emulator for linux. (Keyboard only)
+An Xinput (Xbox 360) Controller emulator for linux. (Keyboard only)
 
 ### Build
 
