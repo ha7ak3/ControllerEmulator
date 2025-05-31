@@ -223,59 +223,59 @@ int main(int argc, char *argv[]) {
   struct input_event keyboard_event;
 
   // Now, create gamepad
-
   int gamepad_fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
   if (gamepad_fd < 0) {
     printf("Opening of input failed! \n");
     return 1;
   }
 
-  ioctl(gamepad_fd, UI_SET_EVBIT, EV_KEY);  // setting Gamepad keys
-  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_A);
-  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_B);
-  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_X);
-  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_Y);
-
-  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_TL);
-  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_TR);
-  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_TL2);
-  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_TR2);
-
-  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_START);
-  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_SELECT);
-  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_MODE);
-
-  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_THUMBL);
-  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_THUMBR);
-
-  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_DPAD_UP);
-  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_DPAD_DOWN);
-  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_DPAD_LEFT);
-  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_DPAD_RIGHT);
-
-  ioctl(gamepad_fd, UI_SET_EVBIT, EV_ABS);  // setting Gamepad thumbsticks
-  ioctl(gamepad_fd, UI_SET_ABSBIT, ABS_X);
-  ioctl(gamepad_fd, UI_SET_ABSBIT, ABS_Y);
-  ioctl(gamepad_fd, UI_SET_ABSBIT, ABS_RX);
-  ioctl(gamepad_fd, UI_SET_ABSBIT, ABS_RY);
-
   struct uinput_user_dev uidev;
-
   memset(&uidev, 0, sizeof(uidev));
-  snprintf(uidev.name, UINPUT_MAX_NAME_SIZE, GAMEPAD_NAME);  // Name of Gamepad
+  // Gamepad Name
+  snprintf(uidev.name, UINPUT_MAX_NAME_SIZE, GAMEPAD_NAME);
   uidev.id.bustype = BUS_USB;
   uidev.id.vendor = 0x45e;
   uidev.id.product = 0x28e;
   uidev.id.version = 0x110;
-  // Parameters of thumbsticks
+  // Setting Gamepad Buttons
+  ioctl(gamepad_fd, UI_SET_EVBIT, EV_KEY);
+  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_SOUTH);  // A
+  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_EAST);   // B
+  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_NORTH);  // Y
+  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_WEST);   // X
+
+  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_TL);   // LB
+  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_TR);   // RB
+  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_TL2);  // LT
+  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_TR2);  // RT
+
+  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_START);   // Start
+  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_SELECT);  // Back
+  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_MODE);    // Guide
+
+  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_THUMBL);  // Left Thumb
+  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_THUMBR);  // Right Thumb
+
+  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_DPAD_UP);     // Dpad Up
+  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_DPAD_DOWN);   // Dpad Down
+  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_DPAD_LEFT);   // Dpad Left
+  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_DPAD_RIGHT);  // Dpad Right
+  // Setting Gamepad Sticks
+  ioctl(gamepad_fd, UI_SET_EVBIT, EV_ABS);
+  ioctl(gamepad_fd, UI_SET_ABSBIT, ABS_X);
+  ioctl(gamepad_fd, UI_SET_ABSBIT, ABS_Y);
+  ioctl(gamepad_fd, UI_SET_ABSBIT, ABS_RX);
+  ioctl(gamepad_fd, UI_SET_ABSBIT, ABS_RY);
+  // Left Stick
   uidev.absmax[ABS_X] = 32767;
   uidev.absmin[ABS_X] = -32768;
   uidev.absfuzz[ABS_X] = 0;
-  uidev.absflat[ABS_X] = 15;
+  uidev.absflat[ABS_X] = 16;
   uidev.absmax[ABS_Y] = 32767;
   uidev.absmin[ABS_Y] = -32768;
   uidev.absfuzz[ABS_Y] = 0;
-  uidev.absflat[ABS_Y] = 15;
+  uidev.absflat[ABS_Y] = 16;
+  // Right Stick
   uidev.absmax[ABS_RX] = 512;
   uidev.absmin[ABS_RX] = -512;
   uidev.absfuzz[ABS_RX] = 0;
@@ -335,16 +335,16 @@ int main(int argc, char *argv[]) {
         if (keyboard_event.value != 2)  // only care about button press and not hold
         {
           if (checkButton(BA, keyboard_event.code)) {
-            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_A, keyboard_event.value);
+            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_SOUTH, keyboard_event.value);
           }
           if (checkButton(BB, keyboard_event.code)) {
-            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_B, keyboard_event.value);
+            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_EAST, keyboard_event.value);
           }
           if (checkButton(BX, keyboard_event.code)) {
-            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_X, keyboard_event.value);
+            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_WEST, keyboard_event.value);
           }
           if (checkButton(BY, keyboard_event.code)) {
-            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_Y, keyboard_event.value);
+            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_NORTH, keyboard_event.value);
           }
           if (checkButton(ST, keyboard_event.code)) {
             send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_START, keyboard_event.value);
@@ -357,7 +357,7 @@ int main(int argc, char *argv[]) {
           }
         }
 
-        /* TRIGGERS and BUMPERS */
+        /* BUMPERS and TRIGGERS */
         if (checkButton(LB, keyboard_event.code)) {
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_TL, keyboard_event.value);
         }
@@ -373,7 +373,7 @@ int main(int argc, char *argv[]) {
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_TR2, keyboard_event.value);
         }
 
-        /* L3 and R3 */
+        /* Left and Right Thumb */
         if (checkButton(TL, keyboard_event.code)) {
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_THUMBL, keyboard_event.value);
         }
@@ -456,13 +456,13 @@ int main(int argc, char *argv[]) {
         send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_X, xaxis == 0 ? 0 : (xaxis == 1 ? 32767 : -32768));
         send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_Y, yaxis == 0 ? 0 : (yaxis == 1 ? 32767 : -32768));
         /* Right Stick */
-        if (rt_down == 1 && altlay) {
+        if (rt_down == 1 && altlay) {  // Lower sensitivity while holding RT in alternate layout
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, rxaxis == 0 ? 0 : (rxaxis == 1 ? 288 : -288));
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, ryaxis == 0 ? 0 : (ryaxis == 1 ? 288 : -288));
-        } else if (lt_down == 1 && !altlay) {
+        } else if (lt_down == 1 && !altlay) {  // Lower sensitivity while holding LT in default layout
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, rxaxis == 0 ? 0 : (rxaxis == 1 ? 288 : -288));
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, ryaxis == 0 ? 0 : (ryaxis == 1 ? 288 : -288));
-        } else {
+        } else {  // Default sensitivity
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, rxaxis == 0 ? 0 : (rxaxis == 1 ? 512 : -512));
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, ryaxis == 0 ? 0 : (ryaxis == 1 ? 512 : -512));
         }
