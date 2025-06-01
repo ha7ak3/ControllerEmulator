@@ -59,8 +59,8 @@ int parse_arguments(int argc, char **argv) {
 void exitFunc(int keyboard_fd, int gamepad_fd) {
   printf("\nExiting.\n");
   ioctl(keyboard_fd, EVIOCGRAB, 0);  // Disable exclusive access
-  close(keyboard_fd);                // Close keyboard
   close(gamepad_fd);                 // Close gamepad
+  close(keyboard_fd);                // Close keyboard
   exit(EXIT_SUCCESS);
 }
 
@@ -106,23 +106,22 @@ static GtkStatusIcon *create_tray_icon(char *start_icon, char *tooltip) {
   return tray_icon;
 }
 
-void waitReleaseAll(int fd) {
-  struct input_event evt;
-  unsigned char key_b[KEY_MAX / 8 + 1];
-  int i, nothing;
-  while (1) {
-    memset(key_b, 0, sizeof(key_b));
-    ioctl(fd, EVIOCGKEY(sizeof(key_b)), key_b);
-    for (nothing = 1, i = 0; i < KEY_MAX / 8 + 1; i++) {
-      if (key_b[i] != 0) {
-        nothing = 0;
-        break;
+/* Return -1 if no key is being pressed, or else the lowest keycode */
+int waitReleaseAll(int fd) {
+  int keycode = -1;                                           // keycode of key being pressed
+  char key_map[KEY_MAX / 8 + 1];                              // Create a bit array the size of the number of keys
+  memset(key_map, 0, sizeof(key_map));                        // Fill keymap[] with zero's
+  ioctl(fd, EVIOCGKEY(sizeof(key_map)), key_map);             // Read keyboard state into keymap[]
+  for (int k = 0; k < KEY_MAX / 8 + 1 && keycode < 0; k++) {  // scan bytes in key_map[] from left to right
+    for (int j = 0; j < 8; j++) {                             // scan each byte from lsb to msb
+      if (key_map[k] & (1 << j)) {                            // if this bit is set: key was being pressed
+        keycode = 8 * k + j;                                  // calculate corresponding keycode
+        break;                                                // don't scan for any other keys
       }
     }
-    if (nothing) break;
-    read(fd, &evt, sizeof(evt));
   }
-  if (verbose) printf("All keys are now released\n");
+  if (verbose && keycode == -1) printf("All keys are now released\n");
+  return keycode;
 }
 
 void setLayout() {
@@ -313,15 +312,19 @@ int main(int argc, char *argv[]) {
         grab = !grab;
         paused = !paused;
         if (paused) {
-          waitReleaseAll(gamepad_fd);
           // Pause Icon
           gtk_status_icon_set_from_icon_name(icon, "media-playback-pause-symbolic");
         } else {
-          waitReleaseAll(keyboard_fd);
           // Gamepad Icon
           gtk_status_icon_set_from_icon_name(icon, "applications-games-symbolic");
         }
-        ioctl(keyboard_fd, EVIOCGRAB, grab);
+        while (1) {
+          if (waitReleaseAll(keyboard_fd) == -1) {
+            sleep(0.5);
+            ioctl(keyboard_fd, EVIOCGRAB, grab);
+            break;
+          }
+        }
       }
 
       // Exit with F12 Key
