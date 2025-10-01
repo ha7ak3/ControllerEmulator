@@ -13,10 +13,17 @@
 
 #include "keys.h"
 #define GAMEPAD_NAME "Virtual Xinput Gamepad"
+#define KEY_NA KEY_UNKNOWN
+#define KEY_LS KEY_LEFTSHIFT
+#define KEY_LA KEY_LEFTALT
+#define KEY_SP KEY_SPACE
+#define KEY_EN KEY_ENTER
+#define KEY_TB KEY_TAB
+#define KEY_DT KEY_DOT
 int BA[3], BB[3], BX[3], BY[3], ST[3], BK[3], GD[3], LB[3], RB[3], LT[3], RT[3], TL[3], TR[3];
 int DU[3], DD[3], DL[3], DR[3], LU[3], LD[3], LL[3], LR[3], RU[3], RD[3], RL[3], RR[3];
-char *tooltip = GAMEPAD_NAME;
-char *start_icon = "applications-games-symbolic";
+char* tooltip = GAMEPAD_NAME;
+char* start_icon = "applications-games-symbolic";
 char pathKeyboard[256] = "???";
 char xaxis = 0;
 char yaxis = 0;
@@ -28,9 +35,9 @@ bool altlay = false;
 int rt_down = 0;
 int lt_down = 0;
 int grab = 1;
-GtkStatusIcon *icon;
+GtkStatusIcon* icon;
 
-static int parse_opt(int key, char *arg, struct argp_state *state) {
+static int parse_opt(int key, char* arg, struct argp_state* state) {
   switch (key) {
     case 'k':
       if (strlen(arg) < 256) strcpy(pathKeyboard, arg);
@@ -46,7 +53,7 @@ static int parse_opt(int key, char *arg, struct argp_state *state) {
   return 0;
 }
 
-int parse_arguments(int argc, char **argv) {
+int parse_arguments(int argc, char** argv) {
   struct argp_option options[] = {{"keyboard", 'k', "PATH", 0, "The path to keyboard (should look something like /dev/input/eventX)"},
                                   {"verbose", 'v', 0, OPTION_ARG_OPTIONAL, "Show more info"},
                                   {"altlay", 'l', 0, OPTION_ARG_OPTIONAL, "Use alternate buttons layout."},
@@ -97,8 +104,8 @@ void send_event_and_sync(int gamepad_fd, struct input_event gamepad_event, int T
 
 void tray_icon_on_click(int keyboard_fd, int gamepad_fd) { exitFunc(keyboard_fd, gamepad_fd); }
 
-static GtkStatusIcon *create_tray_icon(char *start_icon, char *tooltip) {
-  GtkStatusIcon *tray_icon;
+static GtkStatusIcon* create_tray_icon(char* start_icon, char* tooltip) {
+  GtkStatusIcon* tray_icon;
   tray_icon = gtk_status_icon_new_from_icon_name(start_icon);
   g_signal_connect(G_OBJECT(tray_icon), "activate", G_CALLBACK(tray_icon_on_click), NULL);
   gtk_status_icon_set_visible(tray_icon, TRUE);
@@ -106,80 +113,62 @@ static GtkStatusIcon *create_tray_icon(char *start_icon, char *tooltip) {
   return tray_icon;
 }
 
-/* Return -1 if no key is being pressed, or else the lowest keycode */
-int waitReleaseAll(int fd) {
-  int keycode = -1;                                           // keycode of key being pressed
-  char key_map[KEY_MAX / 8 + 1];                              // Create a bit array the size of the number of keys
-  memset(key_map, 0, sizeof(key_map));                        // Fill keymap[] with zero's
-  ioctl(fd, EVIOCGKEY(sizeof(key_map)), key_map);             // Read keyboard state into keymap[]
-  for (int k = 0; k < KEY_MAX / 8 + 1 && keycode < 0; k++) {  // scan bytes in key_map[] from left to right
-    for (int j = 0; j < 8; j++) {                             // scan each byte from lsb to msb
-      if (key_map[k] & (1 << j)) {                            // if this bit is set: key was being pressed
-        keycode = 8 * k + j;                                  // calculate corresponding keycode
-        break;                                                // don't scan for any other keys
-      }
-    }
-  }
-  if (verbose && keycode == -1) printf("All keys are now released\n");
-  return keycode;
+void setAltLayout() {
+  printf("Using alternate layout.\n");
+  BA[0] = KEY_K, BA[1] = KEY_NA, BA[2] = KEY_NA;
+  BB[0] = KEY_L, BB[1] = KEY_LA, BB[2] = KEY_NA;
+  BX[0] = KEY_J, BX[1] = KEY_NA, BX[2] = KEY_NA;
+  BY[0] = KEY_I, BY[1] = KEY_NA, BY[2] = KEY_NA;
+  ST[0] = KEY_N, ST[1] = KEY_NA, ST[2] = KEY_NA;
+  BK[0] = KEY_X, BK[1] = KEY_B, BK[2] = KEY_NA;
+  GD[0] = KEY_EN, GD[1] = KEY_NA, GD[2] = KEY_NA;
+  LB[0] = KEY_Q, LB[1] = KEY_R, LB[2] = KEY_NA;
+  RB[0] = KEY_E, RB[1] = KEY_Y, RB[2] = KEY_LS;
+  LT[0] = KEY_Z, LT[1] = KEY_4, LT[2] = KEY_SP;
+  RT[0] = KEY_C, RT[1] = KEY_6, RT[2] = KEY_NA;
+  TL[0] = KEY_V, TL[1] = KEY_5, TL[2] = KEY_NA;
+  TR[0] = KEY_TB, TR[1] = KEY_NA, TR[2] = KEY_NA;
+  DU[0] = KEY_T, DU[1] = KEY_NA, DU[2] = KEY_NA;
+  DD[0] = KEY_G, DD[1] = KEY_DT, DD[2] = KEY_NA;
+  DL[0] = KEY_F, DL[1] = KEY_NA, DL[2] = KEY_NA;
+  DR[0] = KEY_H, DR[1] = KEY_NA, DR[2] = KEY_NA;
+  LU[0] = KEY_W, LU[1] = KEY_NA, LU[2] = KEY_NA;
+  LD[0] = KEY_S, LD[1] = KEY_NA, LD[2] = KEY_NA;
+  LL[0] = KEY_A, LL[1] = KEY_NA, LL[2] = KEY_NA;
+  LR[0] = KEY_D, LR[1] = KEY_NA, LR[2] = KEY_NA;
+  RU[0] = KEY_1, RU[1] = KEY_8, RU[2] = KEY_NA;
+  RD[0] = KEY_2, RD[1] = KEY_9, RD[2] = KEY_NA;
+  RL[0] = KEY_U, RL[1] = KEY_NA, RL[2] = KEY_NA;
+  RR[0] = KEY_O, RR[1] = KEY_NA, RR[2] = KEY_NA;
 }
 
 void setLayout() {
   printf("Using default layout.\n");
-  BA[0] = KEY_K, BA[1] = KEY_UNKNOWN, BA[2] = KEY_UNKNOWN;
-  BB[0] = KEY_L, BB[1] = KEY_LEFTALT, BB[2] = KEY_UNKNOWN;
-  BX[0] = KEY_J, BX[1] = KEY_UNKNOWN, BX[2] = KEY_UNKNOWN;
-  BY[0] = KEY_I, BY[1] = KEY_UNKNOWN, BY[2] = KEY_UNKNOWN;
-  ST[0] = KEY_N, ST[1] = KEY_UNKNOWN, ST[2] = KEY_UNKNOWN;
-  BK[0] = KEY_X, BK[1] = KEY_B, BK[2] = KEY_UNKNOWN;
-  GD[0] = KEY_ENTER, GD[1] = KEY_UNKNOWN, GD[2] = KEY_UNKNOWN;
-  LB[0] = KEY_Q, LB[1] = KEY_R, LB[2] = KEY_UNKNOWN;
-  RB[0] = KEY_E, RB[1] = KEY_Y, RB[2] = KEY_LEFTSHIFT;
-  LT[0] = KEY_Z, LT[1] = KEY_4, LT[2] = KEY_SPACE;
-  RT[0] = KEY_C, RT[1] = KEY_6, RT[2] = KEY_UNKNOWN;
-  TL[0] = KEY_V, TL[1] = KEY_5, TL[2] = KEY_UNKNOWN;
-  TR[0] = KEY_TAB, TR[1] = KEY_UNKNOWN, TR[2] = KEY_UNKNOWN;
-  DU[0] = KEY_T, DU[1] = KEY_UNKNOWN, DU[2] = KEY_UNKNOWN;
-  DD[0] = KEY_G, DD[1] = KEY_DOT, DD[2] = KEY_UNKNOWN;
-  DL[0] = KEY_F, DL[1] = KEY_UNKNOWN, DL[2] = KEY_UNKNOWN;
-  DR[0] = KEY_H, DR[1] = KEY_UNKNOWN, DR[2] = KEY_UNKNOWN;
-  LU[0] = KEY_W, LU[1] = KEY_UNKNOWN, LU[2] = KEY_UNKNOWN;
-  LD[0] = KEY_S, LD[1] = KEY_UNKNOWN, LD[2] = KEY_UNKNOWN;
-  LL[0] = KEY_A, LL[1] = KEY_UNKNOWN, LL[2] = KEY_UNKNOWN;
-  LR[0] = KEY_D, LR[1] = KEY_UNKNOWN, LR[2] = KEY_UNKNOWN;
-  RU[0] = KEY_1, RU[1] = KEY_8, RU[2] = KEY_UNKNOWN;
-  RD[0] = KEY_2, RD[1] = KEY_9, RD[2] = KEY_UNKNOWN;
-  RL[0] = KEY_U, RL[1] = KEY_UNKNOWN, RL[2] = KEY_UNKNOWN;
-  RR[0] = KEY_O, RR[1] = KEY_UNKNOWN, RR[2] = KEY_UNKNOWN;
-}
-
-void setAltLayout() {
-  printf("Using alternate layout.\n");
-  BA[0] = KEY_K, BA[1] = KEY_UNKNOWN, BA[2] = KEY_UNKNOWN;
-  BB[0] = KEY_L, BB[1] = KEY_UNKNOWN, BB[2] = KEY_UNKNOWN;
-  BX[0] = KEY_J, BX[1] = KEY_UNKNOWN, BX[2] = KEY_UNKNOWN;
-  BY[0] = KEY_I, BY[1] = KEY_LEFTALT, BY[2] = KEY_UNKNOWN;
-  ST[0] = KEY_N, ST[1] = KEY_UNKNOWN, ST[2] = KEY_UNKNOWN;
-  BK[0] = KEY_X, BK[1] = KEY_UNKNOWN, BK[2] = KEY_UNKNOWN;
-  GD[0] = KEY_ENTER, GD[1] = KEY_UNKNOWN, GD[2] = KEY_UNKNOWN;
-  LB[0] = KEY_Q, LB[1] = KEY_R, LB[2] = KEY_UNKNOWN;
-  RB[0] = KEY_E, RB[1] = KEY_Y, RB[2] = KEY_UNKNOWN;
-  LT[0] = KEY_LEFTSHIFT, LT[1] = KEY_4, LT[2] = KEY_UNKNOWN;
-  RT[0] = KEY_SPACE, RT[1] = KEY_6, RT[2] = KEY_UNKNOWN;
-  TL[0] = KEY_C, TL[1] = KEY_UNKNOWN, TL[2] = KEY_UNKNOWN;
-  TR[0] = KEY_Z, TR[1] = KEY_UNKNOWN, TR[2] = KEY_UNKNOWN;
-  DU[0] = KEY_T, DU[1] = KEY_TAB, DU[2] = KEY_UNKNOWN;
-  DD[0] = KEY_G, DD[1] = KEY_DOT, DD[2] = KEY_UNKNOWN;
-  DL[0] = KEY_F, DL[1] = KEY_UNKNOWN, DL[2] = KEY_UNKNOWN;
-  DR[0] = KEY_H, DR[1] = KEY_UNKNOWN, DR[2] = KEY_UNKNOWN;
-  LU[0] = KEY_W, LU[1] = KEY_UNKNOWN, LU[2] = KEY_UNKNOWN;
-  LD[0] = KEY_S, LD[1] = KEY_UNKNOWN, LD[2] = KEY_UNKNOWN;
-  LL[0] = KEY_A, LL[1] = KEY_UNKNOWN, LL[2] = KEY_UNKNOWN;
-  LR[0] = KEY_D, LR[1] = KEY_UNKNOWN, LR[2] = KEY_UNKNOWN;
-  RU[0] = KEY_1, RU[1] = KEY_8, RU[2] = KEY_UNKNOWN;
-  RD[0] = KEY_2, RD[1] = KEY_9, RD[2] = KEY_UNKNOWN;
-  RL[0] = KEY_U, RL[1] = KEY_UNKNOWN, RL[2] = KEY_UNKNOWN;
-  RR[0] = KEY_O, RR[1] = KEY_UNKNOWN, RR[2] = KEY_UNKNOWN;
+  BA[0] = KEY_K, BA[1] = KEY_NA, BA[2] = KEY_NA;
+  BB[0] = KEY_L, BB[1] = KEY_NA, BB[2] = KEY_NA;
+  BX[0] = KEY_J, BX[1] = KEY_NA, BX[2] = KEY_NA;
+  BY[0] = KEY_I, BY[1] = KEY_LA, BY[2] = KEY_NA;
+  ST[0] = KEY_N, ST[1] = KEY_NA, ST[2] = KEY_NA;
+  BK[0] = KEY_X, BK[1] = KEY_NA, BK[2] = KEY_NA;
+  GD[0] = KEY_EN, GD[1] = KEY_NA, GD[2] = KEY_NA;
+  LB[0] = KEY_Q, LB[1] = KEY_R, LB[2] = KEY_NA;
+  RB[0] = KEY_E, RB[1] = KEY_Y, RB[2] = KEY_NA;
+  LT[0] = KEY_LS, LT[1] = KEY_4, LT[2] = KEY_NA;
+  RT[0] = KEY_SP, RT[1] = KEY_6, RT[2] = KEY_NA;
+  TL[0] = KEY_V, TL[1] = KEY_NA, TL[2] = KEY_NA;
+  TR[0] = KEY_B, TR[1] = KEY_NA, TR[2] = KEY_NA;
+  DU[0] = KEY_T, DU[1] = KEY_TB, DU[2] = KEY_NA;
+  DD[0] = KEY_G, DD[1] = KEY_DT, DD[2] = KEY_NA;
+  DL[0] = KEY_F, DL[1] = KEY_Z, DL[2] = KEY_NA;
+  DR[0] = KEY_H, DR[1] = KEY_C, DR[2] = KEY_NA;
+  LU[0] = KEY_W, LU[1] = KEY_NA, LU[2] = KEY_NA;
+  LD[0] = KEY_S, LD[1] = KEY_NA, LD[2] = KEY_NA;
+  LL[0] = KEY_A, LL[1] = KEY_NA, LL[2] = KEY_NA;
+  LR[0] = KEY_D, LR[1] = KEY_NA, LR[2] = KEY_NA;
+  RU[0] = KEY_1, RU[1] = KEY_8, RU[2] = KEY_NA;
+  RD[0] = KEY_2, RD[1] = KEY_9, RD[2] = KEY_NA;
+  RL[0] = KEY_U, RL[1] = KEY_NA, RL[2] = KEY_NA;
+  RR[0] = KEY_O, RR[1] = KEY_NA, RR[2] = KEY_NA;
 }
 
 bool checkButton(int buttons[], int key) {
@@ -193,7 +182,7 @@ bool checkButton(int buttons[], int key) {
   return match;
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
   parse_arguments(argc, argv);
   gtk_init(&argc, &argv);
   icon = create_tray_icon(start_icon, tooltip);
@@ -309,21 +298,25 @@ int main(int argc, char *argv[]) {
 
       // Pause Gamepad Toggle (F2)
       if (keyboard_event.code == KEY_F2 && keyboard_event.value == 0) {
-        grab = !grab;
         paused = !paused;
+        grab = !grab;
+        ioctl(keyboard_fd, EVIOCGRAB, grab);
         if (paused) {
           // Pause Icon
           gtk_status_icon_set_from_icon_name(icon, "media-playback-pause-symbolic");
+          // Reset Joysticks (Fix joysticks getting stuck)
+          xaxis = 0;
+          yaxis = 0;
+          rxaxis = 0;
+          ryaxis = 0;
+          send_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_X, 0);
+          send_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_Y, 0);
+          send_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, 0);
+          send_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, 0);
+          send_sync_event(gamepad_fd, gamepad_ev);
         } else {
           // Gamepad Icon
           gtk_status_icon_set_from_icon_name(icon, "applications-games-symbolic");
-        }
-        while (1) {
-          if (waitReleaseAll(keyboard_fd) == -1) {
-            sleep(0.5);
-            ioctl(keyboard_fd, EVIOCGRAB, grab);
-            break;
-          }
         }
       }
 

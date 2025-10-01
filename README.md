@@ -27,6 +27,36 @@ sudo xipade -k "DEVICE" [-v]
 | Button       | Key                             | Alternate Key |
 |:------------:|:-------------------------------:|:-------------:|
 | A            | K                               |               |
+| B            | L                               |               |
+| X            | J                               |               |
+| Y            | I                               | LALT          |
+| BACK         | X                               |               |
+| START        | N                               |               |
+| LB           | Q                               | R             |
+| RB           | E                               | Y             |
+| LT           | LSHIFT                          | 4             |
+| RT           | SPACE                           | 6             |
+| LS Click     | V                               |               |
+| RS Click     | B                               |               |
+| DPAD_UP      | T                               | TAB           |
+| DPAD_DOWN    | G                               | .             |
+| DPAD_LEFT    | F                               | Z             |
+| DPAD_RIGHT   | H                               | C             |
+| LSTICK_UP    | W                               |               |
+| LSTICK_DOWN  | S                               |               |
+| LSTICK_LEFT  | A                               |               |
+| LSTICK_RIGHT | D                               |               |
+| RSTICK_UP    | 1                               | 8             |
+| RSTICK_DOWN  | 2                               | 9             |
+| RSTICK_LEFT  | U                               |               |
+| RSTICK_RIGHT | O                               |               |
+| GUIDE        | ENTER                           |               |
+
+### Alternate Layout (US Keyboard Layout) -- For Playing Monster Hunter Games
+
+| Button       | Key                             | Alternate Key |
+|:------------:|:-------------------------------:|:-------------:|
+| A            | K                               |               |
 | B            | L                               | LALT          |
 | X            | J                               |               |
 | Y            | I                               |               |
@@ -39,36 +69,6 @@ sudo xipade -k "DEVICE" [-v]
 | LS Click     | TAB                             | 5             |
 | RS Click     | V                               |               |
 | DPAD_UP      | T                               |               |
-| DPAD_DOWN    | G                               | .             |
-| DPAD_LEFT    | F                               |               |
-| DPAD_RIGHT   | H                               |               |
-| LSTICK_UP    | W                               |               |
-| LSTICK_DOWN  | S                               |               |
-| LSTICK_LEFT  | A                               |               |
-| LSTICK_RIGHT | D                               |               |
-| RSTICK_UP    | 1                               | 8             |
-| RSTICK_DOWN  | 2                               | 9             |
-| RSTICK_LEFT  | U                               |               |
-| RSTICK_RIGHT | O                               |               |
-| GUIDE        | ENTER                           |               |
-
-### Alternate Layout (US Keyboard Layout)
-
-| Button       | Key                             | Alternate Key |
-|:------------:|:-------------------------------:|:-------------:|
-| A            | K                               |               |
-| B            | L                               |               |
-| X            | J                               |               |
-| Y            | I                               | LALT          |
-| BACK         | X                               |               |
-| START        | N                               |               |
-| LB           | Q                               | R             |
-| RB           | E                               | Y             |
-| LT           | LSHIFT                          | 4             |
-| RT           | SPACE                           | 6             |
-| LS Click     | C                               |               |
-| RS Click     | Z                               |               |
-| DPAD_UP      | T                               | TAB           |
 | DPAD_DOWN    | G                               | .             |
 | DPAD_LEFT    | F                               |               |
 | DPAD_RIGHT   | H                               |               |
