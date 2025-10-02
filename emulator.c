@@ -452,10 +452,10 @@ int main(int argc, char* argv[]) {
         send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_X, xaxis == 0 ? 0 : (xaxis == 1 ? 32767 : -32768));
         send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_Y, yaxis == 0 ? 0 : (yaxis == 1 ? 32767 : -32768));
         /* Right Stick */
-        if (rt_down == 1 && altlay) {  // Lower sensitivity while holding RT in alternate layout
+        if (lt_down == 1 && altlay) {  // Lower sensitivity while holding LT in alternate layout
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, rxaxis == 0 ? 0 : (rxaxis == 1 ? 288 : -288));
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, ryaxis == 0 ? 0 : (ryaxis == 1 ? 288 : -288));
-        } else if (lt_down == 1 && !altlay) {  // Lower sensitivity while holding LT in default layout
+        } else if (rt_down == 1 && !altlay) {  // Lower sensitivity while holding RT in default layout
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, rxaxis == 0 ? 0 : (rxaxis == 1 ? 288 : -288));
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, ryaxis == 0 ? 0 : (ryaxis == 1 ? 288 : -288));
         } else {  // Default sensitivity
