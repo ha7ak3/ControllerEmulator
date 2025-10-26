@@ -13,13 +13,13 @@
 
 #include "keys.h"
 #define GAMEPAD_NAME "Virtual Xinput Gamepad"
-#define KEY_NA KEY_UNKNOWN
-#define KEY_LS KEY_LEFTSHIFT
-#define KEY_LA KEY_LEFTALT
-#define KEY_SP KEY_SPACE
-#define KEY_EN KEY_ENTER
-#define KEY_TB KEY_TAB
-#define KEY_DT KEY_DOT
+#define KEYUK KEY_UNKNOWN
+#define KEYLS KEY_LEFTSHIFT
+#define KEYLA KEY_LEFTALT
+#define KEYSP KEY_SPACE
+#define KEYEN KEY_ENTER
+#define KEYTB KEY_TAB
+#define KEYDT KEY_DOT
 int BA[3], BB[3], BX[3], BY[3], ST[3], BK[3], GD[3], LB[3], RB[3], LT[3], RT[3], TL[3], TR[3];
 int DU[3], DD[3], DL[3], DR[3], LU[3], LD[3], LL[3], LR[3], RU[3], RD[3], RL[3], RR[3];
 char* tooltip = GAMEPAD_NAME;
@@ -113,68 +113,74 @@ static GtkStatusIcon* create_tray_icon(char* start_icon, char* tooltip) {
   return tray_icon;
 }
 
+void setKeyButtons(int BTN[], int KEYa, int KEYb, int KEYc) {
+  BTN[2] = KEYc;
+  BTN[1] = KEYb;
+  BTN[0] = KEYa;
+}
+
 void setAltLayout() {
-  printf("Using alternate layout.\n");
-  BA[0] = KEY_K, BA[1] = KEY_NA, BA[2] = KEY_NA;
-  BB[0] = KEY_L, BB[1] = KEY_LA, BB[2] = KEY_NA;
-  BX[0] = KEY_J, BX[1] = KEY_NA, BX[2] = KEY_NA;
-  BY[0] = KEY_I, BY[1] = KEY_NA, BY[2] = KEY_NA;
-  ST[0] = KEY_N, ST[1] = KEY_NA, ST[2] = KEY_NA;
-  BK[0] = KEY_X, BK[1] = KEY_B, BK[2] = KEY_NA;
-  GD[0] = KEY_EN, GD[1] = KEY_NA, GD[2] = KEY_NA;
-  LB[0] = KEY_Q, LB[1] = KEY_R, LB[2] = KEY_NA;
-  RB[0] = KEY_E, RB[1] = KEY_Y, RB[2] = KEY_LS;
-  LT[0] = KEY_Z, LT[1] = KEY_4, LT[2] = KEY_SP;
-  RT[0] = KEY_C, RT[1] = KEY_6, RT[2] = KEY_NA;
-  TL[0] = KEY_V, TL[1] = KEY_5, TL[2] = KEY_NA;
-  TR[0] = KEY_TB, TR[1] = KEY_NA, TR[2] = KEY_NA;
-  DU[0] = KEY_T, DU[1] = KEY_NA, DU[2] = KEY_NA;
-  DD[0] = KEY_G, DD[1] = KEY_DT, DD[2] = KEY_NA;
-  DL[0] = KEY_F, DL[1] = KEY_NA, DL[2] = KEY_NA;
-  DR[0] = KEY_H, DR[1] = KEY_NA, DR[2] = KEY_NA;
-  LU[0] = KEY_W, LU[1] = KEY_NA, LU[2] = KEY_NA;
-  LD[0] = KEY_S, LD[1] = KEY_NA, LD[2] = KEY_NA;
-  LL[0] = KEY_A, LL[1] = KEY_NA, LL[2] = KEY_NA;
-  LR[0] = KEY_D, LR[1] = KEY_NA, LR[2] = KEY_NA;
-  RU[0] = KEY_1, RU[1] = KEY_8, RU[2] = KEY_NA;
-  RD[0] = KEY_2, RD[1] = KEY_9, RD[2] = KEY_NA;
-  RL[0] = KEY_U, RL[1] = KEY_NA, RL[2] = KEY_NA;
-  RR[0] = KEY_O, RR[1] = KEY_NA, RR[2] = KEY_NA;
+  printf("Using alternate layout.\n");  // for Monster Hunter Games
+  setKeyButtons(BA, KEY_K, KEYUK, KEYUK);
+  setKeyButtons(BB, KEY_L, KEYLA, KEYUK);
+  setKeyButtons(BX, KEY_J, KEYUK, KEYUK);
+  setKeyButtons(BY, KEY_I, KEYUK, KEYUK);
+  setKeyButtons(ST, KEY_N, KEYUK, KEYUK);
+  setKeyButtons(BK, KEY_X, KEY_B, KEYUK);
+  setKeyButtons(GD, KEYEN, KEYUK, KEYUK);
+  setKeyButtons(LB, KEY_Q, KEY_R, KEYUK);
+  setKeyButtons(RB, KEY_E, KEY_Y, KEYLS);
+  setKeyButtons(LT, KEY_Z, KEY_4, KEYSP);
+  setKeyButtons(RT, KEY_C, KEY_6, KEYUK);
+  setKeyButtons(TL, KEY_V, KEY_5, KEYUK);
+  setKeyButtons(TR, KEYTB, KEYUK, KEYUK);
+  setKeyButtons(DU, KEY_T, KEYUK, KEYUK);
+  setKeyButtons(DD, KEY_G, KEYDT, KEYUK);
+  setKeyButtons(DL, KEY_F, KEYUK, KEYUK);
+  setKeyButtons(DR, KEY_H, KEYUK, KEYUK);
+  setKeyButtons(LU, KEY_W, KEYUK, KEYUK);
+  setKeyButtons(LD, KEY_S, KEYUK, KEYUK);
+  setKeyButtons(LL, KEY_A, KEYUK, KEYUK);
+  setKeyButtons(LR, KEY_D, KEYUK, KEYUK);
+  setKeyButtons(RU, KEY_1, KEY_8, KEYUK);
+  setKeyButtons(RD, KEY_2, KEY_9, KEYUK);
+  setKeyButtons(RL, KEY_U, KEYUK, KEYUK);
+  setKeyButtons(RR, KEY_O, KEYUK, KEYUK);
 }
 
 void setLayout() {
-  printf("Using default layout.\n");
-  BA[0] = KEY_K, BA[1] = KEY_NA, BA[2] = KEY_NA;
-  BB[0] = KEY_L, BB[1] = KEY_NA, BB[2] = KEY_NA;
-  BX[0] = KEY_J, BX[1] = KEY_NA, BX[2] = KEY_NA;
-  BY[0] = KEY_I, BY[1] = KEY_LA, BY[2] = KEY_NA;
-  ST[0] = KEY_N, ST[1] = KEY_NA, ST[2] = KEY_NA;
-  BK[0] = KEY_X, BK[1] = KEY_NA, BK[2] = KEY_NA;
-  GD[0] = KEY_EN, GD[1] = KEY_NA, GD[2] = KEY_NA;
-  LB[0] = KEY_Q, LB[1] = KEY_R, LB[2] = KEY_NA;
-  RB[0] = KEY_E, RB[1] = KEY_Y, RB[2] = KEY_NA;
-  LT[0] = KEY_LS, LT[1] = KEY_4, LT[2] = KEY_NA;
-  RT[0] = KEY_SP, RT[1] = KEY_6, RT[2] = KEY_NA;
-  TL[0] = KEY_V, TL[1] = KEY_NA, TL[2] = KEY_NA;
-  TR[0] = KEY_B, TR[1] = KEY_NA, TR[2] = KEY_NA;
-  DU[0] = KEY_T, DU[1] = KEY_TB, DU[2] = KEY_NA;
-  DD[0] = KEY_G, DD[1] = KEY_DT, DD[2] = KEY_NA;
-  DL[0] = KEY_F, DL[1] = KEY_Z, DL[2] = KEY_NA;
-  DR[0] = KEY_H, DR[1] = KEY_C, DR[2] = KEY_NA;
-  LU[0] = KEY_W, LU[1] = KEY_NA, LU[2] = KEY_NA;
-  LD[0] = KEY_S, LD[1] = KEY_NA, LD[2] = KEY_NA;
-  LL[0] = KEY_A, LL[1] = KEY_NA, LL[2] = KEY_NA;
-  LR[0] = KEY_D, LR[1] = KEY_NA, LR[2] = KEY_NA;
-  RU[0] = KEY_1, RU[1] = KEY_8, RU[2] = KEY_NA;
-  RD[0] = KEY_2, RD[1] = KEY_9, RD[2] = KEY_NA;
-  RL[0] = KEY_U, RL[1] = KEY_NA, RL[2] = KEY_NA;
-  RR[0] = KEY_O, RR[1] = KEY_NA, RR[2] = KEY_NA;
+  printf("Using default layout.\n");  // for Any Game
+  setKeyButtons(BA, KEY_K, KEYUK, KEYUK);
+  setKeyButtons(BB, KEY_L, KEYUK, KEYUK);
+  setKeyButtons(BX, KEY_J, KEYUK, KEYUK);
+  setKeyButtons(BY, KEY_I, KEYLA, KEYUK);
+  setKeyButtons(ST, KEY_N, KEYUK, KEYUK);
+  setKeyButtons(BK, KEY_X, KEYUK, KEYUK);
+  setKeyButtons(GD, KEYEN, KEYUK, KEYUK);
+  setKeyButtons(LB, KEY_Q, KEY_R, KEYUK);
+  setKeyButtons(RB, KEY_E, KEY_Y, KEYUK);
+  setKeyButtons(LT, KEYLS, KEY_4, KEYUK);
+  setKeyButtons(RT, KEYSP, KEY_6, KEYUK);
+  setKeyButtons(TL, KEY_V, KEYUK, KEYUK);
+  setKeyButtons(TR, KEY_B, KEYUK, KEYUK);
+  setKeyButtons(DU, KEY_T, KEYTB, KEYUK);
+  setKeyButtons(DD, KEY_G, KEYDT, KEYUK);
+  setKeyButtons(DL, KEY_F, KEY_Z, KEYUK);
+  setKeyButtons(DR, KEY_H, KEY_C, KEYUK);
+  setKeyButtons(LU, KEY_W, KEYUK, KEYUK);
+  setKeyButtons(LD, KEY_S, KEYUK, KEYUK);
+  setKeyButtons(LL, KEY_A, KEYUK, KEYUK);
+  setKeyButtons(LR, KEY_D, KEYUK, KEYUK);
+  setKeyButtons(RU, KEY_1, KEY_8, KEYUK);
+  setKeyButtons(RD, KEY_2, KEY_9, KEYUK);
+  setKeyButtons(RL, KEY_U, KEYUK, KEYUK);
+  setKeyButtons(RR, KEY_O, KEYUK, KEYUK);
 }
 
-bool checkButton(int buttons[], int key) {
+bool checkButton(int BTNS[], int KEY) {
   bool match = false;
-  for (int i = 0; i < 3; ++i) {
-    if (buttons[i] == key) {
+  for (int i = 0; i < 3; i++) {
+    if (BTNS[i] == KEY) {
       match = true;
       break;
     }
@@ -255,12 +261,12 @@ int main(int argc, char* argv[]) {
   ioctl(gamepad_fd, UI_SET_ABSBIT, ABS_RX);
   ioctl(gamepad_fd, UI_SET_ABSBIT, ABS_RY);
   // Left Stick
-  uidev.absmax[ABS_X] = 32767;
-  uidev.absmin[ABS_X] = -32768;
+  uidev.absmax[ABS_X] = 512;
+  uidev.absmin[ABS_X] = -512;
   uidev.absfuzz[ABS_X] = 0;
   uidev.absflat[ABS_X] = 16;
-  uidev.absmax[ABS_Y] = 32767;
-  uidev.absmin[ABS_Y] = -32768;
+  uidev.absmax[ABS_Y] = 512;
+  uidev.absmin[ABS_Y] = -512;
   uidev.absfuzz[ABS_Y] = 0;
   uidev.absflat[ABS_Y] = 16;
   // Right Stick
@@ -449,8 +455,8 @@ int main(int argc, char* argv[]) {
           }
         }
         /* Left Stick */
-        send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_X, xaxis == 0 ? 0 : (xaxis == 1 ? 32767 : -32768));
-        send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_Y, yaxis == 0 ? 0 : (yaxis == 1 ? 32767 : -32768));
+        send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_X, xaxis == 0 ? 0 : (xaxis == 1 ? 512 : -512));
+        send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_Y, yaxis == 0 ? 0 : (yaxis == 1 ? 512 : -512));
         /* Right Stick */
         if (lt_down == 1 && altlay) {  // Lower sensitivity while holding LT in alternate layout
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, rxaxis == 0 ? 0 : (rxaxis == 1 ? 288 : -288));
