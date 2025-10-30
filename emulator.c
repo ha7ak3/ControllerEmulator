@@ -11,7 +11,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "keys.h"
 #define GAMEPAD_NAME "Virtual Xinput Gamepad"
 #define KEYUK KEY_UNKNOWN
 #define KEYLS KEY_LEFTSHIFT
@@ -20,8 +19,19 @@
 #define KEYEN KEY_ENTER
 #define KEYTB KEY_TAB
 #define KEYDT KEY_DOT
-int BA[3], BB[3], BX[3], BY[3], ST[3], BK[3], GD[3], LB[3], RB[3], LT[3], RT[3], TL[3], TR[3];
-int DU[3], DD[3], DL[3], DR[3], LU[3], LD[3], LL[3], LR[3], RU[3], RD[3], RL[3], RR[3];
+// Face Buttons
+int BA[3], BB[3], BX[3], BY[3];
+// Start, Back and Guide Buttons
+int ST[3], BK[3], GD[3];
+// Bumpers, Triggers and Thumbs
+int LB[3], RB[3];
+int LT[3], RT[3];
+int TL[3], TR[3];
+// DPAD
+int DU[3], DD[3], DL[3], DR[3];
+// Right and Left Analog Sticks
+int LU[3], LD[3], LL[3], LR[3];
+int RU[3], RD[3], RL[3], RR[3];
 char* tooltip = GAMEPAD_NAME;
 char* start_icon = "applications-games-symbolic";
 char pathKeyboard[256] = "???";
@@ -32,9 +42,10 @@ char ryaxis = 0;
 bool verbose = false;
 bool paused = false;
 bool altlay = false;
-int rt_down = 0;
-int lt_down = 0;
+bool sense = false;
 int grab = 1;
+int KeyCode;
+int KeyValue;
 GtkStatusIcon* icon;
 
 static int parse_opt(int key, char* arg, struct argp_state* state) {
@@ -113,71 +124,74 @@ static GtkStatusIcon* create_tray_icon(char* start_icon, char* tooltip) {
   return tray_icon;
 }
 
-void setKeyButtons(int BTN[], int KEYa, int KEYb, int KEYc) {
+// Sets up to three keys per button
+void setKeysForButtons(int BTN[], int KEYa, int KEYb, int KEYc) {
   BTN[2] = KEYc;
   BTN[1] = KEYb;
   BTN[0] = KEYa;
 }
 
-void setAltLayout() {
-  printf("Using alternate layout.\n");  // for Monster Hunter Games
-  setKeyButtons(BA, KEY_K, KEYUK, KEYUK);
-  setKeyButtons(BB, KEY_L, KEYLA, KEYUK);
-  setKeyButtons(BX, KEY_J, KEYUK, KEYUK);
-  setKeyButtons(BY, KEY_I, KEYUK, KEYUK);
-  setKeyButtons(ST, KEY_N, KEYUK, KEYUK);
-  setKeyButtons(BK, KEY_X, KEY_B, KEYUK);
-  setKeyButtons(GD, KEYEN, KEYUK, KEYUK);
-  setKeyButtons(LB, KEY_Q, KEY_R, KEYUK);
-  setKeyButtons(RB, KEY_E, KEY_Y, KEYLS);
-  setKeyButtons(LT, KEY_Z, KEY_4, KEYSP);
-  setKeyButtons(RT, KEY_C, KEY_6, KEYUK);
-  setKeyButtons(TL, KEY_V, KEY_5, KEYUK);
-  setKeyButtons(TR, KEYTB, KEYUK, KEYUK);
-  setKeyButtons(DU, KEY_T, KEYUK, KEYUK);
-  setKeyButtons(DD, KEY_G, KEYDT, KEYUK);
-  setKeyButtons(DL, KEY_F, KEYUK, KEYUK);
-  setKeyButtons(DR, KEY_H, KEYUK, KEYUK);
-  setKeyButtons(LU, KEY_W, KEYUK, KEYUK);
-  setKeyButtons(LD, KEY_S, KEYUK, KEYUK);
-  setKeyButtons(LL, KEY_A, KEYUK, KEYUK);
-  setKeyButtons(LR, KEY_D, KEYUK, KEYUK);
-  setKeyButtons(RU, KEY_1, KEY_8, KEYUK);
-  setKeyButtons(RD, KEY_2, KEY_9, KEYUK);
-  setKeyButtons(RL, KEY_U, KEYUK, KEYUK);
-  setKeyButtons(RR, KEY_O, KEYUK, KEYUK);
+// Create the Gamepad Buttons Layouts
+void setGamepadLayout() {
+  if (!altlay) {
+    printf("Using default layout.\n");  // for Any Game
+    setKeysForButtons(BA, KEY_K, KEYUK, KEYUK);
+    setKeysForButtons(BB, KEY_L, KEYUK, KEYUK);
+    setKeysForButtons(BX, KEY_J, KEYUK, KEYUK);
+    setKeysForButtons(BY, KEY_I, KEYLA, KEYUK);
+    setKeysForButtons(ST, KEY_N, KEYUK, KEYUK);
+    setKeysForButtons(BK, KEY_X, KEYUK, KEYUK);
+    setKeysForButtons(GD, KEYEN, KEYUK, KEYUK);
+    setKeysForButtons(LB, KEY_Q, KEY_R, KEYUK);
+    setKeysForButtons(RB, KEY_E, KEY_Y, KEYUK);
+    setKeysForButtons(LT, KEYLS, KEY_4, KEYUK);
+    setKeysForButtons(RT, KEYSP, KEY_6, KEYUK);
+    setKeysForButtons(TL, KEY_V, KEYUK, KEYUK);
+    setKeysForButtons(TR, KEY_B, KEYUK, KEYUK);
+    setKeysForButtons(DU, KEY_T, KEYTB, KEYUK);
+    setKeysForButtons(DD, KEY_G, KEYDT, KEYUK);
+    setKeysForButtons(DL, KEY_F, KEY_Z, KEYUK);
+    setKeysForButtons(DR, KEY_H, KEY_C, KEYUK);
+    setKeysForButtons(LU, KEY_W, KEYUK, KEYUK);
+    setKeysForButtons(LD, KEY_S, KEYUK, KEYUK);
+    setKeysForButtons(LL, KEY_A, KEYUK, KEYUK);
+    setKeysForButtons(LR, KEY_D, KEYUK, KEYUK);
+    setKeysForButtons(RU, KEY_1, KEY_8, KEYUK);
+    setKeysForButtons(RD, KEY_2, KEY_9, KEYUK);
+    setKeysForButtons(RL, KEY_U, KEYUK, KEYUK);
+    setKeysForButtons(RR, KEY_O, KEYUK, KEYUK);
+  } else {
+    printf("Using alternate layout.\n");  // for Monster Hunter Games
+    setKeysForButtons(BA, KEY_K, KEYUK, KEYUK);
+    setKeysForButtons(BB, KEY_L, KEYLA, KEYUK);
+    setKeysForButtons(BX, KEY_J, KEYUK, KEYUK);
+    setKeysForButtons(BY, KEY_I, KEYUK, KEYUK);
+    setKeysForButtons(ST, KEY_N, KEYUK, KEYUK);
+    setKeysForButtons(BK, KEY_X, KEY_B, KEYUK);
+    setKeysForButtons(GD, KEYEN, KEYUK, KEYUK);
+    setKeysForButtons(LB, KEY_Q, KEY_R, KEYUK);
+    setKeysForButtons(RB, KEY_E, KEY_Y, KEYLS);
+    setKeysForButtons(LT, KEY_Z, KEY_4, KEYSP);
+    setKeysForButtons(RT, KEY_C, KEY_6, KEYUK);
+    setKeysForButtons(TL, KEYTB, KEY_5, KEYUK);
+    setKeysForButtons(TR, KEY_V, KEYUK, KEYUK);
+    setKeysForButtons(DU, KEY_T, KEYUK, KEYUK);
+    setKeysForButtons(DD, KEY_G, KEYDT, KEYUK);
+    setKeysForButtons(DL, KEY_F, KEYUK, KEYUK);
+    setKeysForButtons(DR, KEY_H, KEYUK, KEYUK);
+    setKeysForButtons(LU, KEY_W, KEYUK, KEYUK);
+    setKeysForButtons(LD, KEY_S, KEYUK, KEYUK);
+    setKeysForButtons(LL, KEY_A, KEYUK, KEYUK);
+    setKeysForButtons(LR, KEY_D, KEYUK, KEYUK);
+    setKeysForButtons(RU, KEY_1, KEY_8, KEYUK);
+    setKeysForButtons(RD, KEY_2, KEY_9, KEYUK);
+    setKeysForButtons(RL, KEY_U, KEYUK, KEYUK);
+    setKeysForButtons(RR, KEY_O, KEYUK, KEYUK);
+  }
 }
 
-void setLayout() {
-  printf("Using default layout.\n");  // for Any Game
-  setKeyButtons(BA, KEY_K, KEYUK, KEYUK);
-  setKeyButtons(BB, KEY_L, KEYUK, KEYUK);
-  setKeyButtons(BX, KEY_J, KEYUK, KEYUK);
-  setKeyButtons(BY, KEY_I, KEYLA, KEYUK);
-  setKeyButtons(ST, KEY_N, KEYUK, KEYUK);
-  setKeyButtons(BK, KEY_X, KEYUK, KEYUK);
-  setKeyButtons(GD, KEYEN, KEYUK, KEYUK);
-  setKeyButtons(LB, KEY_Q, KEY_R, KEYUK);
-  setKeyButtons(RB, KEY_E, KEY_Y, KEYUK);
-  setKeyButtons(LT, KEYLS, KEY_4, KEYUK);
-  setKeyButtons(RT, KEYSP, KEY_6, KEYUK);
-  setKeyButtons(TL, KEY_V, KEYUK, KEYUK);
-  setKeyButtons(TR, KEY_B, KEYUK, KEYUK);
-  setKeyButtons(DU, KEY_T, KEYTB, KEYUK);
-  setKeyButtons(DD, KEY_G, KEYDT, KEYUK);
-  setKeyButtons(DL, KEY_F, KEY_Z, KEYUK);
-  setKeyButtons(DR, KEY_H, KEY_C, KEYUK);
-  setKeyButtons(LU, KEY_W, KEYUK, KEYUK);
-  setKeyButtons(LD, KEY_S, KEYUK, KEYUK);
-  setKeyButtons(LL, KEY_A, KEYUK, KEYUK);
-  setKeyButtons(LR, KEY_D, KEYUK, KEYUK);
-  setKeyButtons(RU, KEY_1, KEY_8, KEYUK);
-  setKeyButtons(RD, KEY_2, KEY_9, KEYUK);
-  setKeyButtons(RL, KEY_U, KEYUK, KEYUK);
-  setKeyButtons(RR, KEY_O, KEYUK, KEYUK);
-}
-
-bool checkButton(int BTNS[], int KEY) {
+// Check if a Button and a Key match
+bool matchKeyWithButton(int BTNS[], int KEY) {
   bool match = false;
   for (int i = 0; i < 3; i++) {
     if (BTNS[i] == KEY) {
@@ -193,11 +207,7 @@ int main(int argc, char* argv[]) {
   gtk_init(&argc, &argv);
   icon = create_tray_icon(start_icon, tooltip);
 
-  if (altlay) {
-    setAltLayout();
-  } else {
-    setLayout();
-  }
+  setGamepadLayout();
 
   sleep(1);
   int rcode = 0;
@@ -301,9 +311,11 @@ int main(int argc, char* argv[]) {
         if (paused) printf("\n");
         printf("> Keyboard: type %d code %d value %d \n", keyboard_event.type, keyboard_event.code, keyboard_event.value);
       }
+      KeyCode = keyboard_event.code;
+      KeyValue = keyboard_event.value;
 
       // Pause Gamepad Toggle (F2)
-      if (keyboard_event.code == KEY_F2 && keyboard_event.value == 0) {
+      if (KeyCode == KEY_F2 && KeyValue == 0) {
         paused = !paused;
         grab = !grab;
         ioctl(keyboard_fd, EVIOCGRAB, grab);
@@ -327,130 +339,133 @@ int main(int argc, char* argv[]) {
       }
 
       // Exit with F12 Key
-      if (keyboard_event.code == KEY_F12 && keyboard_event.value == 0) {
+      if (KeyCode == KEY_F12 && KeyValue == 0) {
         exitFunc(keyboard_fd, gamepad_fd);
         break;
       }
 
+      // Sensitivity Toggle with CTRL
+      if (KeyCode == KEY_LEFTCTRL && KeyValue == 0) {
+        sense = !sense;
+      }
+
       if (!paused) {
         /* Face Buttons */
-        if (keyboard_event.value != 2)  // only care about button press and not hold
+        if (KeyValue != 2)  // only care about button press and not hold
         {
-          if (checkButton(BA, keyboard_event.code)) {
-            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_SOUTH, keyboard_event.value);
+          if (matchKeyWithButton(BA, KeyCode)) {
+            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_SOUTH, KeyValue);
           }
-          if (checkButton(BB, keyboard_event.code)) {
-            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_EAST, keyboard_event.value);
+          if (matchKeyWithButton(BB, KeyCode)) {
+            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_EAST, KeyValue);
           }
-          if (checkButton(BX, keyboard_event.code)) {
-            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_WEST, keyboard_event.value);
+          if (matchKeyWithButton(BX, KeyCode)) {
+            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_WEST, KeyValue);
           }
-          if (checkButton(BY, keyboard_event.code)) {
-            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_NORTH, keyboard_event.value);
+          if (matchKeyWithButton(BY, KeyCode)) {
+            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_NORTH, KeyValue);
           }
-          if (checkButton(ST, keyboard_event.code)) {
-            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_START, keyboard_event.value);
+          if (matchKeyWithButton(ST, KeyCode)) {
+            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_START, KeyValue);
           }
-          if (checkButton(BK, keyboard_event.code)) {
-            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_SELECT, keyboard_event.value);
+          if (matchKeyWithButton(BK, KeyCode)) {
+            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_SELECT, KeyValue);
           }
-          if (checkButton(GD, keyboard_event.code)) {
-            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_MODE, keyboard_event.value);
+          if (matchKeyWithButton(GD, KeyCode)) {
+            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_MODE, KeyValue);
           }
         }
 
         /* BUMPERS and TRIGGERS */
-        if (checkButton(LB, keyboard_event.code)) {
-          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_TL, keyboard_event.value);
+        if (matchKeyWithButton(LB, KeyCode)) {
+          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_TL, KeyValue);
         }
-        if (checkButton(RB, keyboard_event.code)) {
-          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_TR, keyboard_event.value);
+        if (matchKeyWithButton(RB, KeyCode)) {
+          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_TR, KeyValue);
         }
-        if (checkButton(LT, keyboard_event.code)) {
-          lt_down = keyboard_event.value == 2 ? 1 : 0;
-          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_TL2, keyboard_event.value);
+        if (matchKeyWithButton(LT, KeyCode)) {
+          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_TL2, KeyValue);
         }
-        if (checkButton(RT, keyboard_event.code)) {
-          rt_down = keyboard_event.value == 2 ? 1 : 0;
-          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_TR2, keyboard_event.value);
+        if (matchKeyWithButton(RT, KeyCode)) {
+          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_TR2, KeyValue);
         }
 
         /* Left and Right Thumb */
-        if (checkButton(TL, keyboard_event.code)) {
-          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_THUMBL, keyboard_event.value);
+        if (matchKeyWithButton(TL, KeyCode)) {
+          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_THUMBL, KeyValue);
         }
-        if (checkButton(TR, keyboard_event.code)) {
-          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_THUMBR, keyboard_event.value);
+        if (matchKeyWithButton(TR, KeyCode)) {
+          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_THUMBR, KeyValue);
         }
 
         /* DPAD */
-        if (checkButton(DU, keyboard_event.code)) {
-          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_DPAD_UP, keyboard_event.value);
+        if (matchKeyWithButton(DU, KeyCode)) {
+          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_DPAD_UP, KeyValue);
         }
-        if (checkButton(DD, keyboard_event.code)) {
-          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_DPAD_DOWN, keyboard_event.value);
+        if (matchKeyWithButton(DD, KeyCode)) {
+          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_DPAD_DOWN, KeyValue);
         }
-        if (checkButton(DL, keyboard_event.code)) {
-          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_DPAD_LEFT, keyboard_event.value);
+        if (matchKeyWithButton(DL, KeyCode)) {
+          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_DPAD_LEFT, KeyValue);
         }
-        if (checkButton(DR, keyboard_event.code)) {
-          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_DPAD_RIGHT, keyboard_event.value);
+        if (matchKeyWithButton(DR, KeyCode)) {
+          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_DPAD_RIGHT, KeyValue);
         }
 
         /* Analog Sticks */
-        bool pressedOrHold = keyboard_event.value == 4 || keyboard_event.value == 1;
+        bool pressedOrHold = KeyValue == 4 || KeyValue == 1;
         if (pressedOrHold) {
           // Left
-          if (checkButton(LU, keyboard_event.code)) {
+          if (matchKeyWithButton(LU, KeyCode)) {
             yaxis -= 1;
           }
-          if (checkButton(LD, keyboard_event.code)) {
+          if (matchKeyWithButton(LD, KeyCode)) {
             yaxis += 1;
           }
-          if (checkButton(LL, keyboard_event.code)) {
+          if (matchKeyWithButton(LL, KeyCode)) {
             xaxis -= 1;
           }
-          if (checkButton(LR, keyboard_event.code)) {
+          if (matchKeyWithButton(LR, KeyCode)) {
             xaxis += 1;
           }
           // Right
-          if (checkButton(RU, keyboard_event.code)) {
+          if (matchKeyWithButton(RU, KeyCode)) {
             ryaxis -= 1;
           }
-          if (checkButton(RD, keyboard_event.code)) {
+          if (matchKeyWithButton(RD, KeyCode)) {
             ryaxis += 1;
           }
-          if (checkButton(RL, keyboard_event.code)) {
+          if (matchKeyWithButton(RL, KeyCode)) {
             rxaxis -= 1;
           }
-          if (checkButton(RR, keyboard_event.code)) {
+          if (matchKeyWithButton(RR, KeyCode)) {
             rxaxis += 1;
           }
-        } else if (keyboard_event.value == 0) {
+        } else if (KeyValue == 0) {
           // Left
-          if (checkButton(LU, keyboard_event.code)) {
+          if (matchKeyWithButton(LU, KeyCode)) {
             yaxis += 1;
           }
-          if (checkButton(LD, keyboard_event.code)) {
+          if (matchKeyWithButton(LD, KeyCode)) {
             yaxis -= 1;
           }
-          if (checkButton(LL, keyboard_event.code)) {
+          if (matchKeyWithButton(LL, KeyCode)) {
             xaxis += 1;
           }
-          if (checkButton(LR, keyboard_event.code)) {
+          if (matchKeyWithButton(LR, KeyCode)) {
             xaxis -= 1;
           }
           // Right
-          if (checkButton(RU, keyboard_event.code)) {
+          if (matchKeyWithButton(RU, KeyCode)) {
             ryaxis += 1;
           }
-          if (checkButton(RD, keyboard_event.code)) {
+          if (matchKeyWithButton(RD, KeyCode)) {
             ryaxis -= 1;
           }
-          if (checkButton(RL, keyboard_event.code)) {
+          if (matchKeyWithButton(RL, KeyCode)) {
             rxaxis += 1;
           }
-          if (checkButton(RR, keyboard_event.code)) {
+          if (matchKeyWithButton(RR, KeyCode)) {
             rxaxis -= 1;
           }
         }
@@ -458,10 +473,10 @@ int main(int argc, char* argv[]) {
         send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_X, xaxis == 0 ? 0 : (xaxis == 1 ? 512 : -512));
         send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_Y, yaxis == 0 ? 0 : (yaxis == 1 ? 512 : -512));
         /* Right Stick */
-        if (lt_down == 1 && altlay) {  // Lower sensitivity while holding LT in alternate layout
+        if (sense && altlay) {  // Lower sensitivity in alternate layout
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, rxaxis == 0 ? 0 : (rxaxis == 1 ? 288 : -288));
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, ryaxis == 0 ? 0 : (ryaxis == 1 ? 288 : -288));
-        } else if (rt_down == 1 && !altlay) {  // Lower sensitivity while holding RT in default layout
+        } else if (sense && !altlay) {  // Lower sensitivity in default layout
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, rxaxis == 0 ? 0 : (rxaxis == 1 ? 288 : -288));
           send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, ryaxis == 0 ? 0 : (ryaxis == 1 ? 288 : -288));
         } else {  // Default sensitivity
