@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+// Keys and Buttons codes: /usr/include/linux/input-event-codes.h
 #define GAMEPAD_NAME "Virtual Xinput Gamepad"
 #define KEYUK KEY_UNKNOWN
 #define KEYLS KEY_LEFTSHIFT
