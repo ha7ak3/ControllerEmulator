@@ -239,15 +239,15 @@ int main(int argc, char* argv[]) {
   // Gamepad Name
   snprintf(uidev.name, UINPUT_MAX_NAME_SIZE, GAMEPAD_NAME);
   uidev.id.bustype = BUS_USB;
-  uidev.id.vendor = 0x45e;
-  uidev.id.product = 0x28e;
+  uidev.id.vendor = 0x45e;   // Microsoft
+  uidev.id.product = 0x28e;  // Xbox 360
   uidev.id.version = 0x110;
   // Setting Gamepad Buttons
   ioctl(gamepad_fd, UI_SET_EVBIT, EV_KEY);
   ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_SOUTH);  // A
   ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_EAST);   // B
-  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_NORTH);  // Y
-  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_WEST);   // X
+  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_NORTH);  // X
+  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_WEST);   // Y
 
   ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_TL);   // LB
   ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_TR);   // RB
