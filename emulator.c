@@ -1,4 +1,4 @@
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"  // Ignore Deprecated Declarations
 #include <argp.h>
 #include <errno.h>
 #include <fcntl.h>
