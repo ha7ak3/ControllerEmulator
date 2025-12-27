@@ -15,6 +15,7 @@
 #define GAMEPAD_NAME "Virtual Xinput Gamepad"
 #define KEYUK KEY_UNKNOWN
 #define KEYLS KEY_LEFTSHIFT
+#define KEYRS KEY_RIGHTSHIFT
 #define KEYLA KEY_LEFTALT
 #define KEYSP KEY_SPACE
 #define KEYEN KEY_ENTER
@@ -22,8 +23,8 @@
 #define KEYDT KEY_DOT
 // Face Buttons
 int BA[3], BB[3], BX[3], BY[3];
-// Start, Back and Guide Buttons
-int ST[3], BK[3], GD[3];
+// Start, Back, Guide and Capture Buttons
+int ST[3], BK[3], GD[3], BZ[3];
 // Bumpers, Triggers and Thumbs
 int LB[3], RB[3];
 int LT[3], RT[3];
@@ -140,6 +141,7 @@ void setGamepadLayout() {
     setKeysForButtons(BB, KEY_L, KEYUK, KEYUK);
     setKeysForButtons(BX, KEY_J, KEYUK, KEYUK);
     setKeysForButtons(BY, KEY_I, KEYLA, KEYUK);
+    setKeysForButtons(BZ, KEYRS, KEYUK, KEYUK);
     setKeysForButtons(ST, KEY_N, KEYUK, KEYUK);
     setKeysForButtons(BK, KEY_X, KEYUK, KEYUK);
     setKeysForButtons(GD, KEYEN, KEYUK, KEYUK);
@@ -167,6 +169,7 @@ void setGamepadLayout() {
     setKeysForButtons(BB, KEY_L, KEYLA, KEYUK);
     setKeysForButtons(BX, KEY_J, KEYUK, KEYUK);
     setKeysForButtons(BY, KEY_I, KEYUK, KEYUK);
+    setKeysForButtons(BZ, KEYRS, KEYUK, KEYUK);
     setKeysForButtons(ST, KEY_N, KEYUK, KEYUK);
     setKeysForButtons(BK, KEY_X, KEY_B, KEYUK);
     setKeysForButtons(GD, KEYEN, KEYUK, KEYUK);
@@ -239,8 +242,8 @@ int main(int argc, char* argv[]) {
   // Gamepad Name
   snprintf(uidev.name, UINPUT_MAX_NAME_SIZE, GAMEPAD_NAME);
   uidev.id.bustype = BUS_USB;
-  uidev.id.vendor = 0x45e;   // Microsoft
-  uidev.id.product = 0x28e;  // Xbox 360
+  uidev.id.vendor = 0x45e;    // Microsoft
+  uidev.id.product = 0x0b12;  // Xbox Series
   uidev.id.version = 0x110;
   // Setting Gamepad Buttons
   ioctl(gamepad_fd, UI_SET_EVBIT, EV_KEY);
@@ -257,6 +260,7 @@ int main(int argc, char* argv[]) {
   ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_START);   // Start
   ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_SELECT);  // Back
   ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_MODE);    // Guide
+  ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_Z);       // Capture
 
   ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_THUMBL);  // Left Thumb
   ioctl(gamepad_fd, UI_SET_KEYBIT, BTN_THUMBR);  // Right Thumb
@@ -374,6 +378,9 @@ int main(int argc, char* argv[]) {
           }
           if (matchKeyWithButton(GD, KeyCode)) {
             send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_MODE, KeyValue);
+          }
+          if (matchKeyWithButton(BZ, KeyCode)) {
+            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_Z, KeyValue);
           }
         }
 

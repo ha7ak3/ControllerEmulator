@@ -1,5 +1,5 @@
 # ControllerEmulator
-An Xinput (Xbox 360) Controller emulator for linux. (Keyboard only)
+An Xinput (Xbox Series) Controller emulator for linux. (Keyboard only)
 
 ### Build
 
@@ -51,6 +51,7 @@ sudo xipade -k "DEVICE" [-v]
 | RSTICK_LEFT  | U                               |               |
 | RSTICK_RIGHT | O                               |               |
 | GUIDE        | ENTER                           |               |
+| Capture      | RSHIFT                          |               |
 
 ### Alternate Layout (US Keyboard Layout) -- For Playing Monster Hunter Games
 
@@ -81,18 +82,20 @@ sudo xipade -k "DEVICE" [-v]
 | RSTICK_LEFT  | U                               |               |
 | RSTICK_RIGHT | O                               |               |
 | GUIDE        | ENTER                           |               |
+| Capture      | RSHIFT                          |               |
 
 ### Control Keys
 
-| KEY          | USAGE                           | ALTERNATE     |
-|:------------:|:-------------------------------:|:-------------:|
-| F2           | Toggle Pause Controller to Type |               |
-| F12          | Close Program                   | Can be closed by clicking the tray icon |
+| KEY          | USAGE                                  | ALTERNATE                               |
+|:------------:|:--------------------------------------:|:---------------------------------------:|
+| F2           | Toggle Pause Controller to Type        |                                         |
+| F12          | Close Program                          | Can be closed by clicking the tray icon |
+| Control      | Toggle Right Stick Sensibility (Half)  |                                         |
 
 ### Fix Wrong Inputs
-Add this to your .profile or .bashrc/.zshrc config file and log out to apply:
+Add this to your `.profile` or `/etc/environment` config file and log out to apply:
 ```
-export SDL_GAMECONTROLLERCONFIG="030000005e0400008e02000010010000,Xbox 360 Controller,platform:Linux,crc:3540,a:b0,b:b1,x:b3,y:b2,back:b8,guide:b10,start:b9,leftstick:b12,rightstick:b11,leftshoulder:b4,rightshoulder:b5,dpup:b13,dpdown:b14,dpleft:b15,dpright:b16,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:b6,righttrigger:b7,"
+export SDL_GAMECONTROLLERCONFIG="030000005e040000120b000010010000,Xbox Series X Controller,platform:Linux,crc:3540,a:b0,b:b1,x:b3,y:b2,back:b9,guide:b11,start:b10,leftstick:b12,rightstick:b13,leftshoulder:b5,rightshoulder:b6,dpup:b14,dpdown:b15,dpleft:b16,dpright:b17,misc1:b4,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:b7,righttrigger:b8,"
 ```
 
 ### Run without Root (Linux Mint)
@@ -103,7 +106,7 @@ sudo groupadd -f uinput
 sudo gpasswd -a $USER uinput
 ```
 
-In /etc/udev/rules.d/ create a new rule file (99-uinput.rules) and within put this line:
+In `/etc/udev/rules.d/` create a new rule file `99-uinput.rules` and within put this line:
 ```
 KERNEL=="uinput", GROUP="uinput", MODE="0660"
 ```
