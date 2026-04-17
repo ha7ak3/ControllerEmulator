@@ -365,10 +365,10 @@ int main(int argc, char* argv[]) {
             send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_EAST, KeyValue);
           }
           if (matchKeyWithButton(BX, KeyCode)) {
-            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_WEST, KeyValue);
+            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_NORTH, KeyValue);
           }
           if (matchKeyWithButton(BY, KeyCode)) {
-            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_NORTH, KeyValue);
+            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_WEST, KeyValue);
           }
           if (matchKeyWithButton(ST, KeyCode)) {
             send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_START, KeyValue);
