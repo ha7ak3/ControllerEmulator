@@ -122,3 +122,7 @@ https://github.com/niehoff90/ControllerEmulator
 And this project for the analog sticks code:
 
 https://github.com/duzda/TitanSoulsLinuxEmulator
+
+Thanks to mktrayicon for the code idea for the tray icon:
+
+https://github.com/jonhoo/mktrayicon
