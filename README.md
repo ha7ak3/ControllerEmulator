@@ -1,5 +1,11 @@
 # ControllerEmulator
-An Xinput (Xbox Series) Controller emulator for linux. (Keyboard only)
+An Xinput (*Xbox Series*) Controller emulator for **Linux**. (Keyboard only)
+
+### Requirements
+
+- C Compiler (gcc)
+
+- UINPUT Kernel Module
 
 ### Build
 
@@ -17,6 +23,8 @@ sudo xipade -k "DEVICE" [-v]
 
 "DEVICE" -> The path to the keyboard (should look something like /dev/input/eventX)
             run "sudo evtest" to get your device path.
+
+>If you're using *keymapper* or similar software use it's device path.
 
    -v    -> To show more output. Useful for debugging.
 
