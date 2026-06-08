@@ -86,11 +86,11 @@ sudo xipade -k "DEVICE" [-v]
 
 ### Control Keys
 
-| KEY          | USAGE                                  | ALTERNATE                               |
-|:------------:|:--------------------------------------:|:---------------------------------------:|
-| F2           | Toggle Pause Controller to Type        |                                         |
-| F12          | Close Program                          | Can be closed by clicking the tray icon |
-| Control      | Toggle Right Stick Sensibility (Half)  |                                         |
+| KEY          | USAGE                                       | ALTERNATE           |
+|:------------:|:-------------------------------------------:|:-------------------:|
+| F2           | Toggle Pause Controller (to Chat e.g.)      |                     |
+| F12          | Close Emulator                              | Click the tray icon |
+| Control      | Toggle Right Stick Sensibility (Half/Full)  |                     |
 
 ### Fix Wrong Inputs
 Add this to your `.profile` or `/etc/environment` config file and log out to apply:
@@ -115,14 +115,8 @@ Save and Reboot.
 
 ### Credits
 
-Thanks to the original project:
+Thanks to the original [**project**](https://github.com/niehoff90/ControllerEmulator).
 
-https://github.com/niehoff90/ControllerEmulator
+[**TitanSoulsLinuxEmulator**](https://github.com/duzda/TitanSoulsLinuxEmulator) for the analog sticks code idea.
 
-And this project for the analog sticks code:
-
-https://github.com/duzda/TitanSoulsLinuxEmulator
-
-Thanks to mktrayicon for the code idea for the tray icon:
-
-https://github.com/jonhoo/mktrayicon
+[**mktrayicon**](https://github.com/jonhoo/mktrayiconk) for the tray icon code idea.
