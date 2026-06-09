@@ -18,7 +18,7 @@ It will be installed in $HOME/.local/bin
 ### Usage
 
 ```
-sudo xipade -k "DEVICE" [-v]
+sudo xipade -k "DEVICE" [-v] [-l]
 ```
 
 "DEVICE": The path to the keyboard (should look something like `/dev/input/eventX`)
@@ -27,9 +27,9 @@ run `sudo evtest` to get your device path.
 
 >If you're using *keymapper* or similar software use it's device path.
 
-    -v: To show more output. Useful for debugging.
+-v: To show more output. Useful for debugging.
 
-    -l: Alternate buttons layout.
+-l: Alternate buttons layout.
 
 ### Default Layout (US Keyboard Layout)
 
