@@ -104,7 +104,7 @@ run `sudo evtest` to get your device path.
 ### Fix Wrong Inputs
 Add this to your `.profile` or `/etc/environment` config file and log out to apply:
 ```
-export SDL_GAMECONTROLLERCONFIG="030000005e040000120b000010010000,Xbox Series X Controller,platform:Linux,crc:3540,a:b0,b:b1,x:b3,y:b2,back:b9,guide:b11,start:b10,leftstick:b12,rightstick:b13,leftshoulder:b5,rightshoulder:b6,dpup:b14,dpdown:b15,dpleft:b16,dpright:b17,misc1:b4,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:b7,righttrigger:b8,"
+export SDL_GAMECONTROLLERCONFIG="030000005e040000120b000010010000,Xbox Series X Controller,platform:Linux,crc:3540,a:b0,b:b1,x:b2,y:b3,back:b9,guide:b11,start:b10,leftstick:b12,rightstick:b13,leftshoulder:b5,rightshoulder:b6,dpup:b14,dpdown:b15,dpleft:b16,dpright:b17,misc1:b4,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:b7,righttrigger:b8,"
 ```
 
 ### Run without Root (Linux Mint)
