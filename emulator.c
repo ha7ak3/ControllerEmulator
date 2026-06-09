@@ -3,15 +3,16 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <gtk/gtk.h>
+#include <linux/input-event-codes.h>  // Keys and Buttons codes
 #include <linux/input.h>
 #include <linux/uinput.h>
+#include <signal.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-// Keys and Buttons codes: /usr/include/linux/input-event-codes.h
 #define GAMEPAD_NAME "Virtual Xinput Gamepad"
 #define KEYUK KEY_UNKNOWN
 #define KEYLS KEY_LEFTSHIFT
@@ -49,6 +50,8 @@ int grab = 1;
 int KeyCode;
 int KeyValue;
 GtkStatusIcon* icon;
+static int keyboard_fd = -1;
+static int gamepad_fd = -1;
 
 static int parse_opt(int key, char* arg, struct argp_state* state) {
   switch (key) {
@@ -76,46 +79,39 @@ int parse_arguments(int argc, char** argv) {
   return argp_parse(&argp, argc, argv, 0, 0, 0);
 }
 
-void exitFunc(int keyboard_fd, int gamepad_fd) {
+void exitFunc() {
   printf("\nExiting.\n");
   ioctl(keyboard_fd, EVIOCGRAB, 0);  // Disable exclusive access
-  close(gamepad_fd);                 // Close gamepad
-  close(keyboard_fd);                // Close keyboard
+  if (gamepad_fd >= 0) {
+    if (ioctl(gamepad_fd, UI_DEV_DESTROY) < 0) perror("UI_DEV_DESTROY");
+    close(gamepad_fd);
+  }
+  if (keyboard_fd >= 0) {
+    close(keyboard_fd);
+  }
   exit(EXIT_SUCCESS);
 }
 
-void send_sync_event(int gamepad_fd, struct input_event gamepad_event) {
-  memset(&gamepad_event, 0, sizeof(struct input_event));
-  gamepad_event.type = EV_SYN;
-  gamepad_event.code = 0;
-  gamepad_event.value = 0;
-
-  if (write(gamepad_fd, &gamepad_event, sizeof(struct input_event)) < 0) {
-    printf("Error writing sync event\n");
-  }
+static void send_event(int fd, int type, int code, int value) {
+  struct input_event ev;
+  memset(&ev, 0, sizeof(ev));
+  ev.type = type;
+  ev.code = code;
+  ev.value = value;
+  if (write(fd, &ev, sizeof(ev)) < 0)
+    perror("write event");
+  else if (verbose)
+    printf("-> Gamepad: type=%d code=%d value=%d\n", type, code, value);
 }
 
-// TYPE Is The event to write to the gamepad and CODE is an integer value for
-// the button on the gamepad
-void send_event(int gamepad_fd, struct input_event gamepad_event, int TYPE, int CODE, int VALUE) {
-  memset(&gamepad_event, 0, sizeof(struct input_event));
-  gamepad_event.type = TYPE;
-  gamepad_event.code = CODE;
-  gamepad_event.value = VALUE;
+static void send_sync(int fd) { send_event(fd, EV_SYN, SYN_REPORT, 0); }
 
-  if (write(gamepad_fd, &gamepad_event, sizeof(struct input_event)) < 0) {
-    printf("Error writing event to gamepad!\n");
-  } else if (verbose) {
-    printf("> Gamepad: type %d code %d value %d \n", gamepad_event.type, gamepad_event.code, gamepad_event.value);
-  }
+static void send_event_sync(int fd, int type, int code, int value) {
+  send_event(fd, type, code, value);
+  send_sync(fd);
 }
 
-void send_event_and_sync(int gamepad_fd, struct input_event gamepad_event, int TYPE, int CODE, int VALUE) {
-  send_event(gamepad_fd, gamepad_event, TYPE, CODE, VALUE);
-  send_sync_event(gamepad_fd, gamepad_event);
-}
-
-void tray_icon_on_click(int keyboard_fd, int gamepad_fd) { exitFunc(keyboard_fd, gamepad_fd); }
+void tray_icon_on_click(int keyboard_fd, int gamepad_fd) { exitFunc(); }
 
 static GtkStatusIcon* create_tray_icon(char* start_icon, char* tooltip) {
   GtkStatusIcon* tray_icon;
@@ -206,8 +202,18 @@ bool matchKeyWithButton(int BTNS[], int KEY) {
   return match;
 }
 
+static void signal_handler(int sig) {
+  (void)sig;
+  exitFunc();
+  exit(0);
+}
+
 int main(int argc, char* argv[]) {
   parse_arguments(argc, argv);
+
+  signal(SIGINT, signal_handler);
+  signal(SIGTERM, signal_handler);
+
   gtk_init(&argc, &argv);
   icon = create_tray_icon(start_icon, tooltip);
 
@@ -305,8 +311,6 @@ int main(int argc, char* argv[]) {
 
   sleep(0.6);
 
-  struct input_event gamepad_ev;
-
   while (1) {
     sleep(0.001);
     gtk_main_iteration_do(FALSE);
@@ -332,11 +336,11 @@ int main(int argc, char* argv[]) {
           yaxis = 0;
           rxaxis = 0;
           ryaxis = 0;
-          send_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_X, 0);
-          send_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_Y, 0);
-          send_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, 0);
-          send_event(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, 0);
-          send_sync_event(gamepad_fd, gamepad_ev);
+          send_event(gamepad_fd, EV_ABS, ABS_X, 0);
+          send_event(gamepad_fd, EV_ABS, ABS_Y, 0);
+          send_event(gamepad_fd, EV_ABS, ABS_RX, 0);
+          send_event(gamepad_fd, EV_ABS, ABS_RY, 0);
+          send_sync(gamepad_fd);
         } else {
           // Gamepad Icon
           gtk_status_icon_set_from_icon_name(icon, "applications-games-symbolic");
@@ -345,7 +349,7 @@ int main(int argc, char* argv[]) {
 
       // Exit with F12 Key
       if (KeyCode == KEY_F12 && KeyValue == 0) {
-        exitFunc(keyboard_fd, gamepad_fd);
+        exitFunc();
         break;
       }
 
@@ -359,65 +363,65 @@ int main(int argc, char* argv[]) {
         if (KeyValue != 2)  // only care about button press and not hold
         {
           if (matchKeyWithButton(BA, KeyCode)) {
-            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_SOUTH, KeyValue);
+            send_event_sync(gamepad_fd, EV_KEY, BTN_SOUTH, KeyValue);
           }
           if (matchKeyWithButton(BB, KeyCode)) {
-            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_EAST, KeyValue);
+            send_event_sync(gamepad_fd, EV_KEY, BTN_EAST, KeyValue);
           }
           if (matchKeyWithButton(BX, KeyCode)) {
-            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_NORTH, KeyValue);
+            send_event_sync(gamepad_fd, EV_KEY, BTN_NORTH, KeyValue);
           }
           if (matchKeyWithButton(BY, KeyCode)) {
-            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_WEST, KeyValue);
+            send_event_sync(gamepad_fd, EV_KEY, BTN_WEST, KeyValue);
           }
           if (matchKeyWithButton(ST, KeyCode)) {
-            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_START, KeyValue);
+            send_event_sync(gamepad_fd, EV_KEY, BTN_START, KeyValue);
           }
           if (matchKeyWithButton(BK, KeyCode)) {
-            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_SELECT, KeyValue);
+            send_event_sync(gamepad_fd, EV_KEY, BTN_SELECT, KeyValue);
           }
           if (matchKeyWithButton(GD, KeyCode)) {
-            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_MODE, KeyValue);
+            send_event_sync(gamepad_fd, EV_KEY, BTN_MODE, KeyValue);
           }
           if (matchKeyWithButton(BZ, KeyCode)) {
-            send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_Z, KeyValue);
+            send_event_sync(gamepad_fd, EV_KEY, BTN_Z, KeyValue);
           }
         }
 
         /* BUMPERS and TRIGGERS */
         if (matchKeyWithButton(LB, KeyCode)) {
-          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_TL, KeyValue);
+          send_event_sync(gamepad_fd, EV_KEY, BTN_TL, KeyValue);
         }
         if (matchKeyWithButton(RB, KeyCode)) {
-          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_TR, KeyValue);
+          send_event_sync(gamepad_fd, EV_KEY, BTN_TR, KeyValue);
         }
         if (matchKeyWithButton(LT, KeyCode)) {
-          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_TL2, KeyValue);
+          send_event_sync(gamepad_fd, EV_KEY, BTN_TL2, KeyValue);
         }
         if (matchKeyWithButton(RT, KeyCode)) {
-          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_TR2, KeyValue);
+          send_event_sync(gamepad_fd, EV_KEY, BTN_TR2, KeyValue);
         }
 
         /* Left and Right Thumb */
         if (matchKeyWithButton(TL, KeyCode)) {
-          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_THUMBL, KeyValue);
+          send_event_sync(gamepad_fd, EV_KEY, BTN_THUMBL, KeyValue);
         }
         if (matchKeyWithButton(TR, KeyCode)) {
-          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_THUMBR, KeyValue);
+          send_event_sync(gamepad_fd, EV_KEY, BTN_THUMBR, KeyValue);
         }
 
         /* DPAD */
         if (matchKeyWithButton(DU, KeyCode)) {
-          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_DPAD_UP, KeyValue);
+          send_event_sync(gamepad_fd, EV_KEY, BTN_DPAD_UP, KeyValue);
         }
         if (matchKeyWithButton(DD, KeyCode)) {
-          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_DPAD_DOWN, KeyValue);
+          send_event_sync(gamepad_fd, EV_KEY, BTN_DPAD_DOWN, KeyValue);
         }
         if (matchKeyWithButton(DL, KeyCode)) {
-          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_DPAD_LEFT, KeyValue);
+          send_event_sync(gamepad_fd, EV_KEY, BTN_DPAD_LEFT, KeyValue);
         }
         if (matchKeyWithButton(DR, KeyCode)) {
-          send_event_and_sync(gamepad_fd, gamepad_ev, EV_KEY, BTN_DPAD_RIGHT, KeyValue);
+          send_event_sync(gamepad_fd, EV_KEY, BTN_DPAD_RIGHT, KeyValue);
         }
 
         /* Analog Sticks */
@@ -478,18 +482,18 @@ int main(int argc, char* argv[]) {
           }
         }
         /* Left Stick */
-        send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_X, xaxis == 0 ? 0 : (xaxis == 1 ? 512 : -512));
-        send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_Y, yaxis == 0 ? 0 : (yaxis == 1 ? 512 : -512));
+        send_event_sync(gamepad_fd, EV_ABS, ABS_X, xaxis == 0 ? 0 : (xaxis == 1 ? 512 : -512));
+        send_event_sync(gamepad_fd, EV_ABS, ABS_Y, yaxis == 0 ? 0 : (yaxis == 1 ? 512 : -512));
         /* Right Stick */
         if (sense && altlay) {  // Lower sensitivity in alternate layout
-          send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, rxaxis == 0 ? 0 : (rxaxis == 1 ? 288 : -288));
-          send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, ryaxis == 0 ? 0 : (ryaxis == 1 ? 288 : -288));
+          send_event_sync(gamepad_fd, EV_ABS, ABS_RX, rxaxis == 0 ? 0 : (rxaxis == 1 ? 288 : -288));
+          send_event_sync(gamepad_fd, EV_ABS, ABS_RY, ryaxis == 0 ? 0 : (ryaxis == 1 ? 288 : -288));
         } else if (sense && !altlay) {  // Lower sensitivity in default layout
-          send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, rxaxis == 0 ? 0 : (rxaxis == 1 ? 288 : -288));
-          send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, ryaxis == 0 ? 0 : (ryaxis == 1 ? 288 : -288));
+          send_event_sync(gamepad_fd, EV_ABS, ABS_RX, rxaxis == 0 ? 0 : (rxaxis == 1 ? 288 : -288));
+          send_event_sync(gamepad_fd, EV_ABS, ABS_RY, ryaxis == 0 ? 0 : (ryaxis == 1 ? 288 : -288));
         } else {  // Default sensitivity
-          send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RX, rxaxis == 0 ? 0 : (rxaxis == 1 ? 512 : -512));
-          send_event_and_sync(gamepad_fd, gamepad_ev, EV_ABS, ABS_RY, ryaxis == 0 ? 0 : (ryaxis == 1 ? 512 : -512));
+          send_event_sync(gamepad_fd, EV_ABS, ABS_RX, rxaxis == 0 ? 0 : (rxaxis == 1 ? 512 : -512));
+          send_event_sync(gamepad_fd, EV_ABS, ABS_RY, ryaxis == 0 ? 0 : (ryaxis == 1 ? 512 : -512));
         }
 
         if (verbose) printf("\n");
