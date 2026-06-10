@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define GAMEPAD_NAME "Virtual Xinput Gamepad"
+#define GAMEPAD_NAME "Virtual XInput Gamepad"
 #define KEYUK KEY_UNKNOWN
 #define KEYLS KEY_LEFTSHIFT
 #define KEYRS KEY_RIGHTSHIFT
@@ -53,6 +53,7 @@ GtkStatusIcon* icon;
 static int keyboard_fd = -1;
 static int gamepad_fd = -1;
 
+// Parse command line arguments
 static int parse_opt(int key, char* arg, struct argp_state* state) {
   switch (key) {
     case 'k':
@@ -79,7 +80,8 @@ int parse_arguments(int argc, char** argv) {
   return argp_parse(&argp, argc, argv, 0, 0, 0);
 }
 
-void exitFunc() {
+// Close everything when exiting
+void cleanup() {
   printf("\nExiting.\n");
   ioctl(keyboard_fd, EVIOCGRAB, 0);  // Disable exclusive access
   if (gamepad_fd >= 0) {
@@ -92,6 +94,7 @@ void exitFunc() {
   exit(EXIT_SUCCESS);
 }
 
+// Send Gamepad events
 static void send_event(int fd, int type, int code, int value) {
   struct input_event ev;
   memset(&ev, 0, sizeof(ev));
@@ -111,8 +114,10 @@ static void send_event_sync(int fd, int type, int code, int value) {
   send_sync(fd);
 }
 
-void tray_icon_on_click(int keyboard_fd, int gamepad_fd) { exitFunc(); }
+// Exit when clicking the tray icon
+void tray_icon_on_click() { cleanup(); }
 
+// Create the tray icon
 static GtkStatusIcon* create_tray_icon(char* start_icon, char* tooltip) {
   GtkStatusIcon* tray_icon;
   tray_icon = gtk_status_icon_new_from_icon_name(start_icon);
@@ -202,12 +207,14 @@ bool matchKeyWithButton(int BTNS[], int KEY) {
   return match;
 }
 
+// Catch exit signals
 static void signal_handler(int sig) {
   (void)sig;
-  exitFunc();
+  cleanup();
   exit(0);
 }
 
+// This is where the fun begins
 int main(int argc, char* argv[]) {
   parse_arguments(argc, argv);
 
@@ -219,7 +226,6 @@ int main(int argc, char* argv[]) {
 
   setGamepadLayout();
 
-  sleep(1);
   int rcode = 0;
 
   char keyboard_name[256] = "Unknown";
@@ -309,10 +315,8 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
-  sleep(0.6);
-
   while (1) {
-    sleep(0.001);
+    usleep(2500);
     gtk_main_iteration_do(FALSE);
 
     if (read(keyboard_fd, &keyboard_event, sizeof(keyboard_event)) != -1) {
@@ -349,7 +353,7 @@ int main(int argc, char* argv[]) {
 
       // Exit with F12 Key
       if (KeyCode == KEY_F12 && KeyValue == 0) {
-        exitFunc();
+        cleanup();
         break;
       }
 
