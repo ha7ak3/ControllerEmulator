@@ -1,5 +1,5 @@
 # ControllerEmulator
-An XInput (*Xbox Series*) Controller emulator for **Linux**. (Keyboard only)
+XInput (*Xbox Series*) Controller emulator for **Linux**. (Keyboard only)
 
 ### Requirements
 
@@ -128,4 +128,4 @@ Thanks to the original [**project**](https://github.com/niehoff90/ControllerEmul
 
 [**TitanSoulsLinuxEmulator**](https://github.com/duzda/TitanSoulsLinuxEmulator) for the analog sticks code idea.
 
-[**mktrayicon**](https://github.com/jonhoo/mktrayiconk) for the tray icon code idea.
+[**mktrayicon**](https://github.com/jonhoo/mktrayicon) for the tray icon code idea.
